@@ -24,14 +24,28 @@
 	text-align: center;
 	margin-top: 2rem;
 }
+.call-button button:disabled {
+	opacity: 0.5; 
+	cursor: not-allowed; 
+}
 
+.copy-button{
+	text-align: center;
+	margin-bottom: 1rem;
+}
 .video-container {
-	display: grid;
-	grid-template-columns: 1fr 1fr;
-	justify-content: center;
-	align-content: center;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
 	margin-top: 10rem;
 	margin-left: 10rem;
+	margin-right: 10rem;
+}
+
+.video{
+	height: 225px;
+	width: 300px;
+	border: 2px solid #ffff;
 }
 
 .caller {
@@ -47,4 +61,14 @@ body {
 		#8e54e9,
 		#4776e6
 	); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+}
+
+.step-list {
+
+	color: white;
+	margin: 1rem 0; 
+}
+
+.step-list li {
+	margin-bottom: 0.5rem; 
 }

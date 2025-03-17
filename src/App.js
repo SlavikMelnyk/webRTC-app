@@ -15,6 +15,7 @@ function App() {
 	const [ idToCall, setIdToCall ] = useState("")
 	const [ callEnded, setCallEnded] = useState(false)
 	const [ name, setName ] = useState("")
+	const [ errorMessage, setErrorMessage ] = useState("")
 	const myVideo = useRef()
 	const userVideo = useRef()
 	const connectionRef= useRef()
@@ -48,6 +49,11 @@ function App() {
 	}, [])
 
 	const callUser = (id) => {
+		if (!name) {
+			setErrorMessage("Please enter your name before calling.");
+			return;
+		}
+		setErrorMessage("");
 		const peer = new Peer({
 			initiator: true,
 			trickle: false,
@@ -104,7 +110,11 @@ function App() {
 
 	const leaveCall = () => {
 		setCallEnded(true)
-		connectionRef.current.destroy()
+		if (connectionRef.current) {
+			connectionRef.current?.destroy()
+		} else {
+			console.error("No active connection to leave.")
+		}
 	}
 
 	return (
@@ -113,12 +123,17 @@ function App() {
 		<div className="container">
 			<div className="video-container">
 				<div className="video">
-					{stream &&  <video playsInline muted ref={myVideo} autoPlay style={{ width: "300px" }} />}
+					{stream &&  <video playsInline ref={myVideo} autoPlay style={{ width: "300px" }} />}
 				</div>
 				<div className="video">
 					{callAccepted && !callEnded ?
-					<video playsInline ref={userVideo} autoPlay style={{ width: "300px"}} />:
-					null}
+						<video playsInline ref={userVideo} autoPlay style={{ width: "300px"}} />:
+						<ol className="step-list">
+							<li>Please copy other user-id and paste it to ID to call input.</li>
+							<li>Click the Call button, and wait for the user to answer.</li>
+							<li>Enjoy the speaking.</li>
+						</ol>
+					}
 				</div>
 			</div>
 			<div className="myId">
@@ -129,9 +144,11 @@ function App() {
 					value={name}
 					onChange={(e) => setName(e.target.value)}
 					style={{ marginBottom: "20px" }}
-				/>
-				<span>{me}</span>
-
+					/>
+				{errorMessage && <div style={{ color: 'red' }}>{errorMessage}</div>}
+				{me && <button className="copy-button" onClick={() => { navigator.clipboard.writeText(me); }} >
+					Copy UserID
+				</button>}
 				<input
 					id="filled-basic"
 					placeholder="ID to call"
@@ -144,11 +161,10 @@ function App() {
 							End Call
 						</button>
 					) : (
-						<button aria-label="call" onClick={() => callUser(idToCall)}>
-							Phone
+						<button aria-label="call" onClick={() => callUser(idToCall)} disabled={!idToCall}>
+							Call
 						</button>
 					)}
-					{idToCall}
 				</div>
 			</div>
 			<div>
