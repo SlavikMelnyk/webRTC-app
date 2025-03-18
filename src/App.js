@@ -41,7 +41,7 @@ function App() {
 					if (myVideo.current) {
 							myVideo.current.srcObject = stream;
 					} else {
-						console.error("myVideo reference is not set yet.");
+						console.error("myVideo reference is not set yet");
 					}
 				})
 				.catch((error) => {
