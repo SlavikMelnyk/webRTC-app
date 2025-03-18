@@ -1,7 +1,6 @@
 import React from "react"
 import "../App.css"
-import { FaMicrophoneLines, FaMicrophoneLinesSlash, FaVideoSlash, FaVideo } from "react-icons/fa6";
-import { FaPhoneSlash } from "react-icons/fa";
+
 
 function CallAnswer({answerCall, name} ) {
 	return (

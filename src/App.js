@@ -6,8 +6,10 @@ import CallBar from "./callBar/CallBar";
 import CallAnswer from "./common/CallAnswer";
 import CallInput from "./callInput/CallInput";
 import Chat from './chat/Chat';
+import { FaRegUser } from "react-icons/fa";
+import { FaMicrophoneLinesSlash } from "react-icons/fa6";
 
-const socket = io.connect('http://localhost:5001')
+const socket = io.connect('https://192.168.0.112:5001')
 function App() {
 	const [ me, setMe ] = useState("")
 	const [ stream, setStream ] = useState()
@@ -25,23 +27,27 @@ function App() {
 	const [ errorMessage, setErrorMessage ] = useState("")
 	const [isMuted, setIsMuted] = useState(false)
 	const [isVideoEnabled, setIsVideoEnabled] = useState(true)
+	const [secUserVideoEnabled, setSecUserVideoEnabled] = useState(true);
+	const [secUserSoundEnabled, setSecUserSoundEnabled] = useState(true);
 	const myVideo = useRef()
 	const userVideo = useRef()
 	const connectionRef= useRef()
 
 	useEffect(() => {
-		navigator.mediaDevices.getUserMedia({ video: true, audio: true })
-			.then((stream) => {
-				setStream(stream);
-				if (myVideo.current) {
-					myVideo.current.srcObject = stream;
-				} else {
-					console.error("myVideo reference is not set yet.");
-				}
-			})
-			.catch((error) => {
-				console.error("Error accessing media devices.", error);
-			});
+		if (navigator.mediaDevices) {			
+			navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+				.then((stream) => {
+					setStream(stream);
+					if (myVideo.current) {
+							myVideo.current.srcObject = stream;
+					} else {
+						console.error("myVideo reference is not set yet.");
+					}
+				})
+				.catch((error) => {
+					console.error("Error accessing media devices.", error);
+				});
+		}
 
 		socket.on("me", (id) => {
 				setMe(id)
@@ -54,14 +60,22 @@ function App() {
 			setCallerSignal(data.signal)
 		})
 
-		socket.on('receiveMessage', ({ message, userName }) => {
-				setMessages((prevMessages) => [...prevMessages, { message, userName }]);
+		socket.on('receiveMessage', (data) => {
+			if (data.message === 'video-settings') {
+				if (data.userName === userName) {
+					setSecUserVideoEnabled(prev => !prev)
+				}
+			} else if (data.message === 'sound-settings') {
+				if (data.userName === userName) {
+					setSecUserSoundEnabled(prev => !prev)
+				}
+			} else setMessages((prevMessages) => [...prevMessages, data]);
 			});
 
 			return () => {
 				socket.off('receiveMessage');
 			};
-	}, [])
+	}, [userName])
 
     const sendMessage = (data) => {
         if (data.message) {
@@ -97,9 +111,10 @@ function App() {
 				console.error("userVideo reference is not set yet.");
 			}
 		})
-		socket.on("callAccepted", (signal) => {
+		socket.on("callAccepted", (data) => {
 			setCallAccepted(true)
-			peer.signal(signal)
+			setUserName(data.userName)
+			peer.signal(data.signal)
 		})
 
 		connectionRef.current = peer
@@ -113,7 +128,11 @@ function App() {
 			stream: stream
 		})
 		peer.on("signal", (data) => {
-			socket.emit("answerCall", { signal: data, to: caller })
+			socket.emit("answerCall", { 
+				signal: data, 
+				to: caller, 
+				userName: name
+			})
 		})
 		peer.on("stream", (stream) => {
 			if (userVideo.current) {
@@ -146,11 +165,21 @@ function App() {
 				track.enabled = !track.enabled;
 			});
 		}
+		const messageData = {
+            message: 'sound-settings',
+            userName: name
+        };
+        socket.emit('sendMessage', messageData);
 		setIsMuted(prev => !prev);
 	}
 
 	const toggleVideo = () => {
 		setIsVideoEnabled(prev => !prev);
+		const messageData = {
+            message: 'video-settings',
+            userName: name
+        };
+        socket.emit('sendMessage', messageData);
 		if (stream) {
 			stream.getVideoTracks().forEach(track => {
 				track.enabled = !track.enabled;
@@ -163,18 +192,36 @@ function App() {
 			<div className="relative top-0 left-0 flex flex-col sm:flex-row justify-center sm:justify-around items-center w-full h-full flex-grow">
 				{callAccepted && !callEnded && 
 					<div className="absolute top-0 left-0 flex justify-center bg-black w-full h-full">
+						{!secUserVideoEnabled && 
+							<div className="absolute top-0 left-0 flex flex-col justify-center items-center gap-2 text-white text-center w-full h-full">
+								<FaRegUser className="mx-auto" size={40}/>
+								<p>
+									{userName} was stopped his stream
+								</p>
+							</div>
+						}
+						{!secUserSoundEnabled && 
+							<div className="absolute bottom-[74px] left-2 p-2 bg-gray-400 rounded-md">
+								<FaMicrophoneLinesSlash color="white" size={25}/>
+							</div>
+						}
 						<video 
 							playsInline 
 							ref={userVideo} 
 							autoPlay
 							style={{ height: "100%" }}
-							className="object-contain"
+							className={`object-contain ${!secUserVideoEnabled && 'opacity-0'}`}
 						/> 
 					</div>
 				}
 				<div
-					className={`w-fit ${(!callAccepted || callEnded) ? 'w-[600px] h-[450px]'  : 'absolute bottom-[76px]  w-[100px] h-auto sm:w-[300px] sm:h-[225px] right-[10px]'}`}
+					className={`w-fit ${(!callAccepted || callEnded) ? 'w-[600px] h-[450px]'  : 'absolute bottom-[76px] !w-[100px] sm:!w-[300px] sm:h-[225px] right-[10px]'}`}
 				>	
+					{isMuted && isVideoEnabled &&
+						<div className="absolute bottom-2 right-2 p-1 sm:p-2 bg-gray-400 rounded-md">
+							<FaMicrophoneLinesSlash className="w-3 h-3 sm:w-5 sm:h-5" color="white"/>
+						</div>
+					}
 					{stream && 
 						<video 
 							playsInline 
