@@ -1,10 +1,9 @@
 import React from 'react';
 
 const CallInput = ({ name, setName, errorMessage, me, idToCall, setIdToCall, callUser }) => {
-    console.log(idToCall.length, me);
     const disabledCall = idToCall.length !==20 || !me;
     return (
-        <div className="flex flex-col h-fit rounded bg-gradient-to-r from-gray-300 to-indigo-200 p-8 justify-center items-center">
+        <div className="flex flex-col h-fit sm:rounded bg-gradient-to-r from-gray-300 to-indigo-200 p-8 justify-center items-center">
             <div className='flex w-full items-center justify-between gap-4 mb-5'>
                 <div>
                     <input

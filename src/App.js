@@ -5,6 +5,7 @@ import "./App.css"
 import CallBar from "./callBar/CallBar";
 import CallAnswer from "./common/CallAnswer";
 import CallInput from "./callInput/CallInput";
+import Chat from './chat/Chat';
 
 const socket = io.connect('http://localhost:5001')
 function App() {
@@ -16,8 +17,10 @@ function App() {
 	const [ callAccepted, setCallAccepted ] = useState(false)
 	const [ idToCall, setIdToCall ] = useState("")
 	const [ callEnded, setCallEnded] = useState(false)
+	const [ showChat, setShowChat] = useState(false)
 	const [ name, setName ] = useState("")
 	const [ userName, setUserName ] = useState("")
+    const [messages, setMessages] = useState([]);
 
 	const [ errorMessage, setErrorMessage ] = useState("")
 	const [isMuted, setIsMuted] = useState(false)
@@ -50,7 +53,21 @@ function App() {
 			setUserName(data.name)
 			setCallerSignal(data.signal)
 		})
+
+	socket.on('receiveMessage', ({ message, userName }) => {
+            setMessages((prevMessages) => [...prevMessages, { message, userName }]);
+        });
+
+        return () => {
+            socket.off('receiveMessage');
+        };
 	}, [])
+
+    const sendMessage = (data) => {
+        if (data.message) {
+            socket.emit('sendMessage', data);
+        }
+    };
 
 	const callUser = (id) => {
 		if (!name) {
@@ -113,6 +130,7 @@ function App() {
 	}
 
 	const leaveCall = () => {
+		setShowChat(false)
 		setCallEnded(true)
 		if (connectionRef.current) {
 			if (stream) {
@@ -147,8 +165,7 @@ function App() {
 
 	return (
 		<div className="w-full min-h-[100vh] relative flex flex-col">
-			<h1 className="text-center text-white text-xl bg-black">{callAccepted ? userName : 'Zoomish'}</h1>
-			<div className="relative top-0 left-0 flex flex-row justify-around items-center w-full h-full flex-grow">
+			<div className="relative top-0 left-0 flex flex-col sm:flex-row justify-center sm:justify-around items-center w-full h-full flex-grow">
 				{callAccepted && !callEnded && 
 					<div className="absolute top-0 left-0 flex justify-center bg-black w-full h-full">
 						<video 
@@ -156,12 +173,12 @@ function App() {
 							ref={userVideo} 
 							autoPlay
 							style={{ height: "100%" }}
-							className="object-fill"
+							className="object-contain"
 						/> 
 					</div>
 				}
 				<div
-					className={`w-fit ${(!callAccepted || callEnded) ? 'w-[600px] h-[450px]'  : 'absolute bottom-[62px] right-0'}`}
+					className={`w-fit ${(!callAccepted || callEnded) ? 'w-[600px] h-[450px]'  : 'absolute bottom-[62px]  w-[100px] h-auto sm:w-[300px] sm:h-[225px] right-0'}`}
 				>	
 					{stream && 
 						<video 
@@ -191,8 +208,9 @@ function App() {
 				}
 			</div>
 			{callAccepted && !callEnded && (
-				<CallBar toggleMute={toggleMute} toggleVideo={toggleVideo} leaveCall={leaveCall} isMuted={isMuted} isVideoEnabled={isVideoEnabled} />
+				<CallBar toggleMute={toggleMute} toggleVideo={toggleVideo} leaveCall={leaveCall} isMuted={isMuted} isVideoEnabled={isVideoEnabled} showChat={showChat} setShowChat={setShowChat}/>
 			)}
+			{showChat && <Chat name={name} messages={messages} sendMessage={sendMessage}/>}
 		</div>
 	)
 }
