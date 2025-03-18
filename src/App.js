@@ -2,7 +2,9 @@ import React, { useEffect, useRef, useState } from "react"
 import Peer from "simple-peer"
 import io from "socket.io-client"
 import "./App.css"
-
+import CallBar from "./callBar/CallBar";
+import CallAnswer from "./common/CallAnswer";
+import CallInput from "./callInput/CallInput";
 
 const socket = io.connect('http://localhost:5001')
 function App() {
@@ -15,7 +17,11 @@ function App() {
 	const [ idToCall, setIdToCall ] = useState("")
 	const [ callEnded, setCallEnded] = useState(false)
 	const [ name, setName ] = useState("")
+	const [ userName, setUserName ] = useState("")
+
 	const [ errorMessage, setErrorMessage ] = useState("")
+	const [isMuted, setIsMuted] = useState(false)
+	const [isVideoEnabled, setIsVideoEnabled] = useState(true)
 	const myVideo = useRef()
 	const userVideo = useRef()
 	const connectionRef= useRef()
@@ -25,9 +31,7 @@ function App() {
 			.then((stream) => {
 				setStream(stream);
 				if (myVideo.current) {
-					setTimeout(() => {
-						myVideo.current.srcObject = stream;
-					}, 100);
+					myVideo.current.srcObject = stream;
 				} else {
 					console.error("myVideo reference is not set yet.");
 				}
@@ -43,7 +47,7 @@ function App() {
 		socket.on("callUser", (data) => {
 			setReceivingCall(true)
 			setCaller(data.from)
-			setName(data.name)
+			setUserName(data.name)
 			setCallerSignal(data.signal)
 		})
 	}, [])
@@ -111,74 +115,85 @@ function App() {
 	const leaveCall = () => {
 		setCallEnded(true)
 		if (connectionRef.current) {
-			connectionRef.current?.destroy()
+			if (stream) {
+				stream.getVideoTracks().forEach(track => {
+					track.enabled = !track.enabled;
+				});
+			}
+			connectionRef.current = null
+			// connectionRef.current?.destroy()
 		} else {
 			console.error("No active connection to leave.")
 		}
 	}
 
+	const toggleMute = () => {
+		if (stream) {
+			stream.getAudioTracks().forEach(track => {
+				track.enabled = !track.enabled;
+			});
+		}
+		setIsMuted(prev => !prev);
+	}
+
+	const toggleVideo = () => {
+		setIsVideoEnabled(prev => !prev);
+		if (stream) {
+			stream.getVideoTracks().forEach(track => {
+				track.enabled = !track.enabled;
+			});
+		}
+	}
+
 	return (
-		<>
-			<h1 style={{ textAlign: "center", color: '#fff' }}>Zoomish</h1>
-		<div className="container">
-			<div className="video-container">
-				<div className="video">
-					{stream &&  <video playsInline ref={myVideo} autoPlay style={{ width: "300px" }} />}
-				</div>
-				<div className="video">
-					{callAccepted && !callEnded ?
-						<video playsInline ref={userVideo} autoPlay style={{ width: "300px"}} />:
-						<ol className="step-list">
-							<li>Please copy other user-id and paste it to ID to call input.</li>
-							<li>Click the Call button, and wait for the user to answer.</li>
-							<li>Enjoy the speaking.</li>
-						</ol>
-					}
-				</div>
-			</div>
-			<div className="myId">
-				
-				<input
-					id="filled-basic"
-					placeholder="Name"
-					value={name}
-					onChange={(e) => setName(e.target.value)}
-					style={{ marginBottom: "20px" }}
-					/>
-				{errorMessage && <div style={{ color: 'red' }}>{errorMessage}</div>}
-				{me && <button className="copy-button" onClick={() => { navigator.clipboard.writeText(me); }} >
-					Copy UserID
-				</button>}
-				<input
-					id="filled-basic"
-					placeholder="ID to call"
-					value={idToCall}
-					onChange={(e) => setIdToCall(e.target.value)}
-				/>
-				<div className="call-button">
-					{callAccepted && !callEnded ? (
-						<button  color="secondary" onClick={leaveCall}>
-							End Call
-						</button>
-					) : (
-						<button aria-label="call" onClick={() => callUser(idToCall)} disabled={!idToCall}>
-							Call
-						</button>
-					)}
-				</div>
-			</div>
-			<div>
-				{receivingCall && !callAccepted ? (
-						<div className="caller">
-						<h1 >{name} is calling...</h1>
-						<button onClick={answerCall}>
-							Answer
-						</button>
+		<div className="w-full min-h-[100vh] relative flex flex-col">
+			<h1 className="text-center text-white text-xl bg-black">{callAccepted ? userName : 'Zoomish'}</h1>
+			<div className="relative top-0 left-0 flex flex-row justify-around items-center w-full h-full flex-grow">
+				{callAccepted && !callEnded && 
+					<div className="absolute top-0 left-0 flex justify-center bg-black w-full h-full">
+						<video 
+							playsInline 
+							ref={userVideo} 
+							autoPlay
+							style={{ height: "100%" }}
+							className="object-fill"
+						/> 
 					</div>
-				) : null}
+				}
+				<div
+					className={`w-fit ${(!callAccepted || callEnded) ? 'w-[600px] h-[450px]'  : 'absolute bottom-[62px] right-0'}`}
+				>	
+					{stream && 
+						<video 
+							playsInline 
+							ref={myVideo} 
+							autoPlay 
+							style={{ 
+								zIndex:10,
+								width:(!callAccepted || callEnded) ? '600px' : isVideoEnabled ? "300px" : "0px" 
+							}} 
+						/>
+						}
+				</div>
+				{receivingCall && !callAccepted && (
+					<CallAnswer answerCall={answerCall} name={userName} />
+				)}
+				{(!callAccepted || callEnded) && !receivingCall && 
+					<CallInput
+						name={name}
+						setName={setName}
+						errorMessage={errorMessage}
+						me={me}
+						idToCall={idToCall}
+						setIdToCall={setIdToCall}
+						callUser={callUser}
+					/>
+				}
 			</div>
+			{callAccepted && !callEnded && (
+				<CallBar toggleMute={toggleMute} toggleVideo={toggleVideo} leaveCall={leaveCall} isMuted={isMuted} isVideoEnabled={isVideoEnabled} />
+			)}
 		</div>
-		</>
 	)
 }
 
