@@ -43,9 +43,9 @@ function App() {
 				console.error("Error accessing media devices.", error);
 			});
 
-	socket.on("me", (id) => {
-			setMe(id)
-		})
+		socket.on("me", (id) => {
+				setMe(id)
+			})
 
 		socket.on("callUser", (data) => {
 			setReceivingCall(true)
@@ -54,13 +54,13 @@ function App() {
 			setCallerSignal(data.signal)
 		})
 
-	socket.on('receiveMessage', ({ message, userName }) => {
-            setMessages((prevMessages) => [...prevMessages, { message, userName }]);
-        });
+		socket.on('receiveMessage', ({ message, userName }) => {
+				setMessages((prevMessages) => [...prevMessages, { message, userName }]);
+			});
 
-        return () => {
-            socket.off('receiveMessage');
-        };
+			return () => {
+				socket.off('receiveMessage');
+			};
 	}, [])
 
     const sendMessage = (data) => {
@@ -133,13 +133,8 @@ function App() {
 		setShowChat(false)
 		setCallEnded(true)
 		if (connectionRef.current) {
-			if (stream) {
-				stream.getVideoTracks().forEach(track => {
-					track.enabled = !track.enabled;
-				});
-			}
-			connectionRef.current = null
-			// connectionRef.current?.destroy()
+			// connectionRef.current = null
+			connectionRef.current?.destroy()
 		} else {
 			console.error("No active connection to leave.")
 		}
@@ -178,7 +173,7 @@ function App() {
 					</div>
 				}
 				<div
-					className={`w-fit ${(!callAccepted || callEnded) ? 'w-[600px] h-[450px]'  : 'absolute bottom-[62px]  w-[100px] h-auto sm:w-[300px] sm:h-[225px] right-0'}`}
+					className={`w-fit ${(!callAccepted || callEnded) ? 'w-[600px] h-[450px]'  : 'absolute bottom-[76px]  w-[100px] h-auto sm:w-[300px] sm:h-[225px] right-[10px]'}`}
 				>	
 					{stream && 
 						<video 
@@ -195,7 +190,7 @@ function App() {
 				{receivingCall && !callAccepted && (
 					<CallAnswer answerCall={answerCall} name={userName} />
 				)}
-				{(!callAccepted || callEnded) && !receivingCall && 
+				{(!callAccepted || callEnded) && !(receivingCall && !callAccepted) && 
 					<CallInput
 						name={name}
 						setName={setName}
