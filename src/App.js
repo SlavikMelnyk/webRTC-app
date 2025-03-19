@@ -45,6 +45,7 @@ function App() {
 					} else {
 						console.error("myVideo reference is not set yet");
 					}
+					setName(stream.id)
 				})
 				.catch((error) => {
 					console.error("Error accessing media devices.", error);
@@ -75,8 +76,7 @@ function App() {
 				if (data.userName === userName) {
 					setSecUserLeft(true);
 					setCallEnded(true)
-					setIdToCall('');
-					setMessages((prevMessages) => [...prevMessages, {...data, message: 'User left the call'}]);
+					handleNullState();
 					setTimeout(() => {
 						setSecUserLeft(false);
 					}, 3000);
@@ -89,6 +89,17 @@ function App() {
 			};
 	}, [userName])
 
+
+	const handleNullState = ()=>{	
+		setIdToCall('');
+		setUserName('');
+		setIsMuted(false);
+		setIsVideoEnabled(true);
+		setMessages([]);
+		setShowChat(false);
+		setSecUserVideoEnabled(true);
+		setSecUserSoundEnabled(true);
+	}
     const sendMessage = (data) => {
         if (data.message) {
             socket.emit('sendMessage', data);
@@ -179,13 +190,12 @@ function App() {
 		if (stream) {
 			stream.getAudioTracks().forEach(track => {
 				track.enabled = !track.enabled;
-			}).then(()=>{
-				const messageData = {
-					message: 'sound-settings',
-					userName: name
-				};
-				socket.emit('sendMessage', messageData);
-			});
+			})
+			const messageData = {
+				message: 'sound-settings',
+				userName: name
+			};
+			socket.emit('sendMessage', messageData);
 		}
 		setIsMuted(prev => !prev);
 	}
@@ -241,6 +251,7 @@ function App() {
 					}
 					{stream && 
 						<video 
+							muted
 							playsInline 
 							ref={myVideo} 
 							autoPlay 
@@ -265,7 +276,7 @@ function App() {
 						callUser={callUser}
 					/>
 				}
-				{secUserLeft && <div className="absolute bottom-[62px] w-full bg-gray-400 p-2 text-white text-center">User Left the call</div>}
+				{secUserLeft && <div className="absolute top-0 sm:bottom-[62px] w-full bg-gray-400 p-2 text-white text-center">User Left the call</div>}
 			</div>
 			{callAccepted && !callEnded && (
 				<CallBar toggleMute={toggleMute} toggleVideo={toggleVideo} leaveCall={leaveCall} isMuted={isMuted} isVideoEnabled={isVideoEnabled} showChat={showChat} setShowChat={setShowChat}/>
