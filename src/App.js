@@ -29,6 +29,8 @@ function App() {
 	const [isVideoEnabled, setIsVideoEnabled] = useState(true)
 	const [secUserVideoEnabled, setSecUserVideoEnabled] = useState(true);
 	const [secUserSoundEnabled, setSecUserSoundEnabled] = useState(true);
+	const [secUserLeft, setSecUserLeft] = useState(false);
+
 	const myVideo = useRef()
 	const userVideo = useRef()
 	const connectionRef= useRef()
@@ -68,6 +70,16 @@ function App() {
 			} else if (data.message === 'sound-settings') {
 				if (data.userName === userName) {
 					setSecUserSoundEnabled(prev => !prev)
+				}
+			} else if (data.message === 'userLeft-settings') {
+				if (data.userName === userName) {
+					setSecUserLeft(true);
+					setCallEnded(true)
+					setIdToCall('');
+					setMessages((prevMessages) => [...prevMessages, {...data, message: 'User left the call'}]);
+					setTimeout(() => {
+						setSecUserLeft(false);
+					}, 3000);
 				}
 			} else setMessages((prevMessages) => [...prevMessages, data]);
 			});
@@ -152,7 +164,11 @@ function App() {
 		setShowChat(false)
 		setCallEnded(true)
 		if (connectionRef.current) {
-			// connectionRef.current = null
+			const messageData = {
+                message: 'userLeft-settings',
+                userName: name
+            };
+            socket.emit('sendMessage', messageData);
 			connectionRef.current?.destroy()
 		} else {
 			console.error("No active connection to leave.")
@@ -163,13 +179,14 @@ function App() {
 		if (stream) {
 			stream.getAudioTracks().forEach(track => {
 				track.enabled = !track.enabled;
+			}).then(()=>{
+				const messageData = {
+					message: 'sound-settings',
+					userName: name
+				};
+				socket.emit('sendMessage', messageData);
 			});
 		}
-		const messageData = {
-            message: 'sound-settings',
-            userName: name
-        };
-        socket.emit('sendMessage', messageData);
 		setIsMuted(prev => !prev);
 	}
 
@@ -248,6 +265,7 @@ function App() {
 						callUser={callUser}
 					/>
 				}
+				{secUserLeft && <div className="absolute bottom-[62px] w-full bg-gray-400 p-2 text-white text-center">User Left the call</div>}
 			</div>
 			{callAccepted && !callEnded && (
 				<CallBar toggleMute={toggleMute} toggleVideo={toggleVideo} leaveCall={leaveCall} isMuted={isMuted} isVideoEnabled={isVideoEnabled} showChat={showChat} setShowChat={setShowChat}/>
