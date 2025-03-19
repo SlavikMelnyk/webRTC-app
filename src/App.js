@@ -9,7 +9,7 @@ import Chat from './chat/Chat';
 import { FaRegUser } from "react-icons/fa";
 import { FaMicrophoneLinesSlash } from "react-icons/fa6";
 
-const socket = io.connect('https://192.168.0.112:5001')
+const socket = io.connect('https://web-rtc-app-puce.vercel.app/api/socket')
 function App() {
 	const [ me, setMe ] = useState("")
 	const [ stream, setStream ] = useState()
