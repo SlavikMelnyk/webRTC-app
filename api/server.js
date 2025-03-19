@@ -22,6 +22,7 @@ const io = require("socket.io")(server, {
 		origin: [
 					"http://localhost:3000", 
 					"https://192.168.0.112:5001",
+					"https://web-rtc-app-puce.vercel.app/"
 				],
 		methods: [ "GET", "POST" ]
 	}
