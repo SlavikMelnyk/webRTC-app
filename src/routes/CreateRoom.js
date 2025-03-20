@@ -11,8 +11,7 @@ const CreateRoom = () => {
     }
 
     const calllOneToOne = () => {
-        const id = uuid();
-        navigate(`/call-to-one`);
+        window.location.href = '/call-to-one';
     }
     return (
         <div className="flex flex-col text-center items-center justify-center gap-10 min-h-screen">

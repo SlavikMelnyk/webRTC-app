@@ -26,7 +26,7 @@ const Video = (props) => {
                 <div className="absolute top-0 left-0 flex flex-col justify-center items-center gap-2 text-white text-center w-full h-full">
                     <FaRegUser className="mx-auto" size={40}/>
                     <p>
-                        {props.userName} was stopped his stream
+                        {props.userName}
                     </p>
                 </div>
             )}
@@ -300,8 +300,8 @@ const Room = () => {
 
     return (
         <div className="flex flex-col">
-            <div className="flex justify-between items-center p-4 bg-gray-800">
-                <div className={`relative w-[200px] z-10 bg-transparent ${isVideoEnabled ? 'opacity-100' : 'opacity-0'}`}>
+            <div className="flex justify-center items-center p-2 sm:p-4 bg-gray-800">
+                <div className={`relative w-[100px] sm:w-[200px] z-10 bg-transparent ${isVideoEnabled ? 'opacity-100' : 'opacity-0'}`}>
                     <video
                         muted
                         ref={userVideo}
@@ -316,8 +316,7 @@ const Room = () => {
                         {isMuted && <FaMicrophoneLinesSlash className="text-white" />}
                     </div>
                 </div>
-                <h1 className="w-full text-white text-center">Room: {roomID}</h1>
-                {roomID && <button className="text-center bg-gray-400 px-2 py-1 rounded-md" onClick={() => { navigator.clipboard.writeText(window.location.href); }} >
+                {roomID && <button className="absolute top-4 right-1 text-sm sm:text-base sm:right-4 text-end bg-gray-400 px-2 py-1 rounded-md" onClick={() => { navigator.clipboard.writeText(window.location.href); }} >
                     Copy room URL
                 </button>}
                 <div className="flex gap-2">
@@ -325,9 +324,8 @@ const Room = () => {
                 {showChat && <Chat name={userName} messages={messages} sendMessage={sendMessage}/>}
                 </div>
             </div>
-            <div className={`flex-1 p-4 ${showChat ? 'w-[calc(100%-300px)]' : 'w-full'}`}>
+            <div className={`flex-1 flex justify-center p-2 sm:p-4 ${showChat ? 'w-[calc(100%-300px)]' : 'w-full'}`}>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-
                     {peers.map((peerObj, index) => (
                         <Video 
                             key={index} 
