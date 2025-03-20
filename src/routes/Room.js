@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import io from "socket.io-client";
 import Peer from "simple-peer";
 import { useParams, useNavigate } from "react-router-dom";
-
+import { v1 as uuid } from "uuid";
 const Video = (props) => {
     const ref = useRef();
 
@@ -11,6 +11,9 @@ const Video = (props) => {
             ref.current.srcObject = stream;
         })
     }, []);
+    if (props.peer.readable === false) {
+        return null;
+    }
 
     return (
         <div className="relative w-[300px]">
@@ -230,7 +233,7 @@ const Room = () => {
     };
 
     return (
-        <div className="flex flex-col h-screen bg-gray-900">
+        <div className="flex flex-col">
             <div className="flex justify-between items-center p-4 bg-gray-800">
                 <h1 className="text-white text-xl">Room: {roomID}</h1>
                 <div className="flex gap-2">
