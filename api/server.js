@@ -6,11 +6,25 @@ const socketIO = require("socket.io");
 const app = express();
 const server = http.createServer(app);
 
+const getLocalIP = () => {
+  const os = require('os');
+  const interfaces = os.networkInterfaces();
+  for (const name of Object.keys(interfaces)) {
+    for (const iface of interfaces[name]) {
+      if (iface.family === 'IPv4' && !iface.internal) {
+        return iface.address;
+      }
+    }
+  }
+  return '0.0.0.0';
+};
+
+const LOCAL_IP = getLocalIP();
+
 const io = socketIO(server, {
   cors: {
     origin: [
       "http://localhost:3000",
-      "http://localhost:5001",
       "https://web-rtc-app-puce.vercel.app",
       "https://webrtc-app-04ea.onrender.com"
     ],
@@ -104,4 +118,8 @@ io.on("connection", (socket) => {
 })
 
 const PORT = process.env.PORT || 5001;
-server.listen(PORT, () => console.log(`Server is running on port ${PORT}`));
+server.listen(PORT, '0.0.0.0', () => {
+  console.log(`Server is running on:`);
+  console.log(`- Local: http://localhost:${PORT}`);
+  console.log(`- Network: http://${LOCAL_IP}:${PORT}`);
+});

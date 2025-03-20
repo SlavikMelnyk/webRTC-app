@@ -35,7 +35,7 @@ const videoConstraints = {
     width: window.innerWidth / 2
 };
 
-const SOCKET_SERVER = process.env.REACT_APP_SOCKET_SERVER || "http://localhost:5001";
+const SOCKET_SERVER = process.env.REACT_APP_SOCKET_SERVER || "https://webrtc-app-04ea.onrender.com";
 
 const Room = () => {
     const [peers, setPeers] = useState([]);
@@ -51,12 +51,16 @@ const Room = () => {
     useEffect(() => {
         const name = prompt("Please enter your name") || "Anonymous";
         setUserName(name);
+        console.log("Attempting to connect to:", SOCKET_SERVER);
 
         socketRef.current = io(SOCKET_SERVER, {
-            transports: ['websocket'],
-            upgrade: false,
+            transports: ['websocket', 'polling'],
+            upgrade: true,
             reconnection: true,
-            reconnectionAttempts: 5
+            reconnectionAttempts: 5,
+            reconnectionDelay: 1000,
+            timeout: 10000,
+            withCredentials: true
         });
 
         socketRef.current.on("connect", () => {
