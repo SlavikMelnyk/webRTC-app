@@ -241,7 +241,7 @@ function CallToOne() {
 					</div>
 				}
 				<div
-					className={`w-fit ${(!callAccepted || callEnded) ? 'w-[600px] h-[450px]'  : 'absolute bottom-[76px] !w-[100px] sm:!w-[300px] sm:h-[225px] right-[10px]'}`}
+					className={`w-fit ${(!callAccepted || callEnded) ? ' sm:w-[600px] sm:h-[450px]'  : 'absolute bottom-[76px] !w-[100px] sm:!w-[300px] sm:h-[225px] right-[10px]'}`}
 				>	
 					{isMuted && isVideoEnabled &&
 						<div className="absolute bottom-2 right-2 p-1 sm:p-2 bg-gray-400 rounded-md">
@@ -275,7 +275,7 @@ function CallToOne() {
 						callUser={callUser}
 					/>
 				}
-				{secUserLeft && <div className="absolute top-0 sm:bottom-[62px] w-full bg-gray-400 p-2 text-white text-center">User Left the call</div>}
+				{secUserLeft && <div className="absolute top-0 sm:bottom-[62px] w-full bg-gray-400 p-2 text-white text-center transition-all">User Left the call</div>}
 			</div>
 			{callAccepted && !callEnded && (
 				<CallBar toggleMute={toggleMute} toggleVideo={toggleVideo} leaveCall={leaveCall} isMuted={isMuted} isVideoEnabled={isVideoEnabled} showChat={showChat} setShowChat={setShowChat}/>

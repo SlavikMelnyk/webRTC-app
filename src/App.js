@@ -5,10 +5,10 @@ import CreateRoom from './routes/CreateRoom';
 import Room from './routes/Room';
 function App() {
 	return (
-		<BrowserRouter>
+		<BrowserRouter >
 		<Routes>
-		  <Route path="/" element={<CallToOne />} />
-		  <Route path="/create-room/" element={<CreateRoom />} />
+		  <Route path="/" element={<CreateRoom />} />
+		  <Route path="/call-to-one" element={<CallToOne />} />
 		  <Route path="/room/:roomID" element={<Room />} />
 		</Routes>
 	  </BrowserRouter>

@@ -3,6 +3,7 @@ import io from "socket.io-client";
 import Peer from "simple-peer";
 import { useParams, useNavigate } from "react-router-dom";
 import { v1 as uuid } from "uuid";
+import CallBar from "../callBar/CallBar";
 const Video = (props) => {
     const ref = useRef();
 
@@ -45,6 +46,7 @@ const Room = () => {
     const [userName, setUserName] = useState("");
     const [isMuted, setIsMuted] = useState(false);
     const [isVideoEnabled, setIsVideoEnabled] = useState(true);
+    const [showChat, setShowChat] = useState(false)
     const socketRef = useRef();
     const userVideo = useRef();
     const peersRef = useRef([]);
@@ -235,26 +237,12 @@ const Room = () => {
     return (
         <div className="flex flex-col">
             <div className="flex justify-between items-center p-4 bg-gray-800">
-                <h1 className="text-white text-xl">Room: {roomID}</h1>
+                <h1 className="w-full text-white text-center">Room: {roomID}</h1>
+                {roomID && <button className="text-center bg-gray-400 px-2 py-1 rounded-md after:bg-black" onClick={() => { navigator.clipboard.writeText(window.location.href); }} >
+                    Copy room URL
+                </button>}
                 <div className="flex gap-2">
-                    <button
-                        onClick={toggleMute}
-                        className={`p-2 rounded ${isMuted ? 'bg-red-500' : 'bg-green-500'}`}
-                    >
-                        {isMuted ? 'Unmute' : 'Mute'}
-                    </button>
-                    <button
-                        onClick={toggleVideo}
-                        className={`p-2 rounded ${!isVideoEnabled ? 'bg-red-500' : 'bg-green-500'}`}
-                    >
-                        {isVideoEnabled ? 'Turn Off Video' : 'Turn On Video'}
-                    </button>
-                    <button
-                        onClick={leaveRoom}
-                        className="bg-red-500 p-2 rounded"
-                    >
-                        Leave Room
-                    </button>
+                <CallBar toggleMute={toggleMute} toggleVideo={toggleVideo} leaveCall={leaveRoom} isMuted={isMuted} isVideoEnabled={isVideoEnabled} showChat={showChat} setShowChat={setShowChat}/>
                 </div>
             </div>
             <div className="flex-1 p-4">
