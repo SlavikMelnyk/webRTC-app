@@ -4,6 +4,7 @@ import Peer from "simple-peer";
 import { useParams, useNavigate } from "react-router-dom";
 import { v1 as uuid } from "uuid";
 import CallBar from "../callBar/CallBar";
+import Chat from "../chat/Chat";
 const Video = (props) => {
     const ref = useRef();
 
@@ -47,6 +48,7 @@ const Room = () => {
     const [isMuted, setIsMuted] = useState(false);
     const [isVideoEnabled, setIsVideoEnabled] = useState(true);
     const [showChat, setShowChat] = useState(false)
+    const [messages, setMessages] = useState([]);
     const socketRef = useRef();
     const userVideo = useRef();
     const peersRef = useRef([]);
@@ -125,6 +127,14 @@ const Room = () => {
                         alert("Room is full!");
                         navigate("/create-room");
                     });
+
+                    socketRef.current.on('receiveMessage', (data) => {
+                        setMessages((prevMessages) => [...prevMessages, data]);
+                    });
+        
+                    return () => {
+                        socketRef.current.off('receiveMessage');
+                    };
                 })
                 .catch(err => {
                     console.error("Error accessing media devices:", err);
@@ -155,6 +165,12 @@ const Room = () => {
             });
         };
     }, [roomID]);
+
+    const sendMessage = (data) => {
+        if (data.message) {
+            socketRef.current.emit('sendMessage', data);
+        }
+    };
 
     function createPeer(userToSignal, callerID, stream, userName) {
         const peer = new Peer({
@@ -238,14 +254,15 @@ const Room = () => {
         <div className="flex flex-col">
             <div className="flex justify-between items-center p-4 bg-gray-800">
                 <h1 className="w-full text-white text-center">Room: {roomID}</h1>
-                {roomID && <button className="text-center bg-gray-400 px-2 py-1 rounded-md after:bg-black" onClick={() => { navigator.clipboard.writeText(window.location.href); }} >
+                {roomID && <button className="text-center bg-gray-400 px-2 py-1 rounded-md" onClick={() => { navigator.clipboard.writeText(window.location.href); }} >
                     Copy room URL
                 </button>}
                 <div className="flex gap-2">
                 <CallBar toggleMute={toggleMute} toggleVideo={toggleVideo} leaveCall={leaveRoom} isMuted={isMuted} isVideoEnabled={isVideoEnabled} showChat={showChat} setShowChat={setShowChat}/>
+                {showChat && <Chat name={userName} messages={messages} sendMessage={sendMessage}/>}
                 </div>
             </div>
-            <div className="flex-1 p-4">
+            <div className={`flex-1 p-4 ${showChat ? 'w-[calc(100%-300px)]' : 'w-full'}`}>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     <div className="relative w-[300px]">
                         <video
