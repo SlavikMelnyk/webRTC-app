@@ -13,13 +13,13 @@ const Video = (props) => {
     }, []);
 
     return (
-        <div className="relative">
+        <div className="relative w-[300px]">
             <video 
                 className="rounded-lg shadow-lg" 
                 playsInline 
                 autoPlay 
                 ref={ref}
-                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                style={{ objectFit: 'cover' }}
             />
             {props.userName && (
                 <div className="absolute bottom-2 left-2 bg-black bg-opacity-50 text-white px-2 py-1 rounded">
@@ -256,7 +256,7 @@ const Room = () => {
             </div>
             <div className="flex-1 p-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    <div className="relative">
+                    <div className="relative w-[300px]">
                         <video
                             muted
                             ref={userVideo}
