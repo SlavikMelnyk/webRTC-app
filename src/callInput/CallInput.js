@@ -1,6 +1,8 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 
 const CallInput = ({ name, setName, errorMessage, me, idToCall, setIdToCall, callUser }) => {
+    const navigate = useNavigate();
     const disabledCall = idToCall.length !==20 || !me;
     return (
         <div className="flex flex-col h-fit sm:rounded bg-gradient-to-r from-gray-300 to-indigo-200 p-8 justify-center items-center">
@@ -31,6 +33,7 @@ const CallInput = ({ name, setName, errorMessage, me, idToCall, setIdToCall, cal
                     Call
                 </button>
             </div>
+            <button className='bg-gray-400 px-2 py-1 rounded-md w-[150px]' onClick={() => { navigate('/'); }}>Go back</button>
         </div>
     );
 };

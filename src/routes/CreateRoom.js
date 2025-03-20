@@ -34,7 +34,7 @@ const CreateRoom = () => {
                 >
                     Call
                 </button>
-                <p className="mt-1 text-start text-sm w-full text-gray-700 max-w-[90vw] sm:max-w-[400px]">*share the your ID with other user to join the call</p>
+                <p className="mt-1 text-start text-sm w-full text-gray-700 max-w-[90vw] sm:max-w-[400px]">*share your ID with other user to join the call</p>
             </div>
         </div>
     );

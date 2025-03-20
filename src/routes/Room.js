@@ -10,7 +10,8 @@ import { FaMicrophoneLinesSlash } from "react-icons/fa6";
 
 const Video = (props) => {
     const ref = useRef();
-
+    const maxVideoWidth = props.maxVideoWidth;
+    const maxVideoHeight = props.maxVideoHeight;
     useEffect(() => {
         props.peer.on("stream", stream => {
             ref.current.srcObject = stream;
@@ -21,30 +22,35 @@ const Video = (props) => {
     }
 
     return (
-        <div className="relative w-[300px]">
-            {props.videoOff && (
-                <div className="absolute top-0 left-0 flex flex-col justify-center items-center gap-2 text-white text-center w-full h-full">
-                    <FaRegUser className="mx-auto" size={40}/>
-                    <p>
-                        {props.userName}
-                    </p>
-                </div>
-            )}
-            <video 
-                className="rounded-lg shadow-lg" 
-                playsInline 
-                autoPlay 
-                ref={ref}
-                style={{ objectFit: 'cover' }}
-            />
-            {props.userName && (
-                <div className='absolute flex items-center gap-1 bottom-2 left-2 text-white bg-black bg-opacity-50  px-2 py-1 rounded '>
-                    <span>
-                    {props.videoOff ? '' : props.userName}
-                    </span>
-                    {props.isMuted && <FaMicrophoneLinesSlash className="text-white"/>}
-                </div>
-            )}
+        <div className='relative flex items-center justify-center'
+            style={{
+                maxWidth: window.innerWidth > 768 ? maxVideoWidth : 'auto',
+                maxHeight: window.innerWidth <= 768 ? maxVideoHeight : 'auto',
+            }}
+        >
+                {props.videoOff && (
+                    <div className="absolute top-0 left-0 flex flex-col justify-center items-center gap-2 text-white text-center w-full h-full">
+                        <FaRegUser className="mx-auto" size={40}/>
+                        <p>
+                            {props.userName}
+                        </p>
+                    </div>
+                )}
+                <video 
+                    className="rounded-lg shadow-lg max-w-full max-h-full" 
+                    playsInline 
+                    autoPlay 
+                    ref={ref}
+                    style={{ objectFit: 'cover' }}
+                />
+                {props.userName && (
+                    <div className='absolute flex items-center gap-1 top-2 left-2 text-white bg-black bg-opacity-50  px-2 py-1 rounded '>
+                        <span>
+                        {props.videoOff ? '' : props.userName}
+                        </span>
+                        {props.isMuted && <FaMicrophoneLinesSlash className="text-white"/>}
+                    </div>
+                )}
         </div>
     );
 }
@@ -63,9 +69,13 @@ const Room = () => {
     const [isVideoEnabled, setIsVideoEnabled] = useState(true);
     const [showChat, setShowChat] = useState(false)
     const [messages, setMessages] = useState([]);
+    const [maxVideoWidth, setMaxVideoWidth] = useState(300);
+    const [maxVideoHeight, setMaxVideoHeight] = useState(200);
+
     const socketRef = useRef();
     const userVideo = useRef();
     const peersRef = useRef([]);
+    const containerRef = useRef();
     const { roomID } = useParams();
     const navigate = useNavigate();
 
@@ -298,45 +308,48 @@ const Room = () => {
         navigate("/");
     };
 
+    useEffect(()=>{
+        if (containerRef?.current) {
+            setMaxVideoWidth((containerRef?.current?.clientWidth - (showChat ? 300 : 0 ))/3 - 20);            
+            setMaxVideoHeight((containerRef?.current?.clientHeight - 142)/ 3 - 30);
+        }
+    },[containerRef?.current])
+    
     return (
-        <div className="flex flex-col">
-            <div className="flex justify-center items-center p-2 sm:p-4 bg-gray-800">
-                <div className={`relative w-[100px] sm:w-[200px] z-10 bg-transparent ${isVideoEnabled ? 'opacity-100' : 'opacity-0'}`}>
+        <div ref={containerRef} className="flex flex-col min-h-screen">
+            <div className="flex justify-center items-center p-2 sm:p-4 bg-gray-800 h-[76px] sm:h-[116px]">
+                <div className={`relative flex items-center justify-center w-[100px] sm:w-[200px] max-h-[60px] sm:max-h-[100px] z-10 bg-transparent ${isVideoEnabled ? 'opacity-100' : 'opacity-0'}`}>
                     <video
                         muted
                         ref={userVideo}
                         autoPlay
                         playsInline
-                        className='rounded-lg shadow-lg object-cover'
+                        className='rounded-lg shadow-lg object-cover sm:w-[200px] max-h-[60px] sm:max-h-[100px]'
                     />
-                    <div className="absolute flex items-center gap-1 bottom-2 left-2 text-white bg-black bg-opacity-50 px-1 py-[2px] rounded text-[10px]">
-                        <span>
-                            {userName} (You)
-                        </span>
-                        {isMuted && <FaMicrophoneLinesSlash className="text-white" />}
-                    </div>
                 </div>
-                {roomID && <button className="absolute top-4 right-1 text-sm sm:text-base sm:right-4 text-end bg-gray-400 px-2 py-1 rounded-md" onClick={() => { navigator.clipboard.writeText(window.location.href); }} >
+                {roomID && <button className="absolute top-[24px] sm:top-[42px] right-1 text-sm sm:text-base sm:right-4 text-end bg-gray-400 px-2 py-1 rounded-md" onClick={() => { navigator.clipboard.writeText(window.location.href); }} >
                     Copy room URL
                 </button>}
                 <div className="flex gap-2">
-                <CallBar toggleMute={toggleMute} toggleVideo={toggleVideo} leaveCall={leaveRoom} isMuted={isMuted} isVideoEnabled={isVideoEnabled} showChat={showChat} setShowChat={setShowChat}/>
                 {showChat && <Chat name={userName} messages={messages} sendMessage={sendMessage}/>}
                 </div>
             </div>
-            <div className={`flex-1 flex justify-center p-2 sm:p-4 ${showChat ? 'w-[calc(100%-300px)]' : 'w-full'}`}>
+            <div className={`flex-1 flex justify-center mb-[66px] p-2 sm:p-4 ${showChat ? 'w-[calc(100%-300px)]' : 'w-full'}`}>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {peers.map((peerObj, index) => (
                         <Video 
-                            key={index} 
-                            peer={peerObj.peer}
-                            userName={peerObj.userName || `Participant ${index + 1}`}
-                            isMuted={peerObj.isMuted}
-                            videoOff={peerObj.videoOff}
+                        key={index} 
+                        peer={peerObj.peer}
+                        userName={peerObj.userName || `Participant ${index + 1}`}
+                        isMuted={peerObj.isMuted}
+                        videoOff={peerObj.videoOff}
+                        maxVideoWidth={maxVideoWidth}
+                        maxVideoHeight={maxVideoHeight}
                         />
                     ))}
                 </div>
             </div>
+            <CallBar toggleMute={toggleMute} toggleVideo={toggleVideo} leaveCall={leaveRoom} isMuted={isMuted} isVideoEnabled={isVideoEnabled} showChat={showChat} setShowChat={setShowChat}/>
         </div>
     );
 };
