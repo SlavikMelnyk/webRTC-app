@@ -5,6 +5,9 @@ import { useParams, useNavigate } from "react-router-dom";
 import { v1 as uuid } from "uuid";
 import CallBar from "../callBar/CallBar";
 import Chat from "../chat/Chat";
+import { FaRegUser } from "react-icons/fa";
+import { FaMicrophoneLinesSlash } from "react-icons/fa6";
+
 const Video = (props) => {
     const ref = useRef();
 
@@ -19,6 +22,14 @@ const Video = (props) => {
 
     return (
         <div className="relative w-[300px]">
+            {props.videoOff && (
+                <div className="absolute top-0 left-0 flex flex-col justify-center items-center gap-2 text-white text-center w-full h-full">
+                    <FaRegUser className="mx-auto" size={40}/>
+                    <p>
+                        {props.userName} was stopped his stream
+                    </p>
+                </div>
+            )}
             <video 
                 className="rounded-lg shadow-lg" 
                 playsInline 
@@ -27,8 +38,11 @@ const Video = (props) => {
                 style={{ objectFit: 'cover' }}
             />
             {props.userName && (
-                <div className="absolute bottom-2 left-2 bg-black bg-opacity-50 text-white px-2 py-1 rounded">
-                    {props.userName}
+                <div className='absolute flex items-center gap-1 bottom-2 left-2 text-white bg-black bg-opacity-50  px-2 py-1 rounded '>
+                    <span>
+                    {props.videoOff ? '' : props.userName}
+                    </span>
+                    {props.isMuted && <FaMicrophoneLinesSlash className="text-white"/>}
                 </div>
             )}
         </div>
@@ -129,7 +143,29 @@ const Room = () => {
                     });
 
                     socketRef.current.on('receiveMessage', (data) => {
-                        setMessages((prevMessages) => [...prevMessages, data]);
+                        if (data.message === 'sound-settings') {
+                            setPeers(peers => {
+                                const newPeers = [...peers];
+                                
+                                newPeers.forEach(peer => {
+                                    if (peer.userName === data.userName) {
+                                        peer.isMuted = !data.sound;
+                                    }
+                                });
+                                return newPeers;
+                            })
+                        } else if (data.message === 'video-settings') {
+                            setPeers(peers => {
+                                const newPeers = [...peers];
+                                
+                                newPeers.forEach(peer => {
+                                    if (peer.userName === data.userName) {
+                                        peer.videoOff = !data.video;
+                                    }
+                                });
+                                return newPeers;
+                            })
+                        } else setMessages((prevMessages) => [...prevMessages, data]);
                     });
         
                     return () => {
@@ -234,6 +270,12 @@ const Room = () => {
         if (userVideo.current.srcObject) {
             const audioTrack = userVideo.current.srcObject.getAudioTracks()[0];
             audioTrack.enabled = !audioTrack.enabled;
+            const messageData = {
+				message: 'sound-settings',
+				userName, 
+                sound:audioTrack.enabled
+			};
+			socketRef.current.emit('sendMessage', messageData);
             setIsMuted(!isMuted);
         }
     };
@@ -242,6 +284,12 @@ const Room = () => {
         if (userVideo.current.srcObject) {
             const videoTrack = userVideo.current.srcObject.getVideoTracks()[0];
             videoTrack.enabled = !videoTrack.enabled;
+            const messageData = {
+				message: 'video-settings',
+				userName, 
+                video:videoTrack.enabled
+			};
+			socketRef.current.emit('sendMessage', messageData);
             setIsVideoEnabled(!isVideoEnabled);
         }
     };
@@ -253,6 +301,21 @@ const Room = () => {
     return (
         <div className="flex flex-col">
             <div className="flex justify-between items-center p-4 bg-gray-800">
+                <div className={`relative w-[200px] z-10 bg-transparent ${isVideoEnabled ? 'opacity-100' : 'opacity-0'}`}>
+                    <video
+                        muted
+                        ref={userVideo}
+                        autoPlay
+                        playsInline
+                        className='rounded-lg shadow-lg object-cover'
+                    />
+                    <div className="absolute flex items-center gap-1 bottom-2 left-2 text-white bg-black bg-opacity-50 px-1 py-[2px] rounded text-[10px]">
+                        <span>
+                            {userName} (You)
+                        </span>
+                        {isMuted && <FaMicrophoneLinesSlash className="text-white" />}
+                    </div>
+                </div>
                 <h1 className="w-full text-white text-center">Room: {roomID}</h1>
                 {roomID && <button className="text-center bg-gray-400 px-2 py-1 rounded-md" onClick={() => { navigator.clipboard.writeText(window.location.href); }} >
                     Copy room URL
@@ -264,23 +327,14 @@ const Room = () => {
             </div>
             <div className={`flex-1 p-4 ${showChat ? 'w-[calc(100%-300px)]' : 'w-full'}`}>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    <div className="relative w-[300px]">
-                        <video
-                            muted
-                            ref={userVideo}
-                            autoPlay
-                            playsInline
-                            className="rounded-lg shadow-lg w-100 object-cover"
-                        />
-                        <div className="absolute bottom-2 left-2 bg-black bg-opacity-50 text-white px-2 py-1 rounded">
-                            {userName} (You)
-                        </div>
-                    </div>
+
                     {peers.map((peerObj, index) => (
                         <Video 
                             key={index} 
                             peer={peerObj.peer}
                             userName={peerObj.userName || `Participant ${index + 1}`}
+                            isMuted={peerObj.isMuted}
+                            videoOff={peerObj.videoOff}
                         />
                     ))}
                 </div>
