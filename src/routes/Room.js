@@ -310,10 +310,10 @@ const Room = () => {
 
     useEffect(()=>{
         if (containerRef?.current) {
-            setMaxVideoWidth((containerRef?.current?.clientWidth - (showChat ? 300 : 0 ))/3 - 20);            
+            setMaxVideoWidth((containerRef?.current?.clientWidth - (showChat ? ( window.innerWidth > 768 ? 300 : 200 ): 0 ))/(peers.length / 2) - 20);            
             setMaxVideoHeight((containerRef?.current?.clientHeight - 142)/ 3 - 30);
         }
-    },[containerRef?.current])
+    },[peers, containerRef?.current])
     
     return (
         <div ref={containerRef} className="flex flex-col min-h-screen">
@@ -334,8 +334,8 @@ const Room = () => {
                 {showChat && <Chat name={userName} messages={messages} sendMessage={sendMessage}/>}
                 </div>
             </div>
-            <div className={`flex-1 flex justify-center mb-[66px] p-2 sm:p-4 ${showChat ? 'w-[calc(100%-300px)]' : 'w-full'}`}>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className={`flex-1 flex justify-center mb-[66px] p-2 sm:p-4 ${showChat ? 'w-[calc(100%-200px)] sm:w-[calc(100%-300px)]' : 'w-full'}`}>
+                <div className="grid grid-flow-col gap-4">
                     {peers.map((peerObj, index) => (
                         <Video 
                         key={index} 

@@ -20,7 +20,7 @@ const Chat = ({ name, messages, sendMessage }) => {
         }
     }
     return (
-        <div className='absolute z-10 top-[10px] right-[10px] bg-white text-center rounded-md w-[300px] h-fit' style={{ maxHeight: 'calc(100% - 86px)', display: 'flex', flexDirection: 'column' }}>
+        <div className='absolute z-10 top-[10px] right-[10px] bg-white text-center rounded-md w-[200px] sm:w-[300px] h-fit' style={{ maxHeight: 'calc(100% - 86px)', display: 'flex', flexDirection: 'column' }}>
             <div className='px-2 flex-grow overflow-y-auto'>
                 {messages.length > 0 ? (
                     messages.map((msg, index) => (
