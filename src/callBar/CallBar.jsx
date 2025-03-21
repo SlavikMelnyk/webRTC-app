@@ -4,7 +4,7 @@ import { FaMicrophoneLines, FaMicrophoneLinesSlash, FaVideoSlash, FaVideo } from
 import { FaPhoneSlash } from "react-icons/fa";
 import { PiChatCircleLight, PiChatCircleSlash } from "react-icons/pi";
 
-function CallBar({toggleMute, toggleVideo, leaveCall, isMuted, isVideoEnabled, showChat, setShowChat } ) {
+function CallBar({toggleMute, toggleVideo, leaveCall, isMuted, isVideoEnabled, showChat, setShowChat, messageUnread } ) {
 	const handleShowChat = () =>{
 		setShowChat(prev => !prev)
 	}
@@ -30,8 +30,9 @@ function CallBar({toggleMute, toggleVideo, leaveCall, isMuted, isVideoEnabled, s
 				</button>
 				<p className="text-sm cursor-pointer select-none" onClick={leaveCall}>Leave</p>
 			</div>
-			<div className="w-[25%] flex flex-col items-center">
-				<button onClick={handleShowChat}>
+			<div className="relative w-[25%] flex flex-col items-center">
+				<button className="relative" onClick={handleShowChat}>
+					{messageUnread && !showChat ? <div className="absolute right-0 top-0 w-3 h-3 bg-red-500 rounded-full"/> : null}
 					{showChat ? <PiChatCircleSlash size={30}/> : <PiChatCircleLight size={30} />}
 				</button>
 				<p className="text-sm cursor-pointer select-none" onClick={handleShowChat}>Chat</p>

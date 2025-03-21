@@ -15,6 +15,7 @@ const Room = () => {
     const [isVideoEnabled, setIsVideoEnabled] = useState(true);
     const [showChat, setShowChat] = useState(false)
     const [messages, setMessages] = useState([]);
+    const [messageUnread, setMessageUnread] = useState(0);
     const [maxVideoWidth, setMaxVideoWidth] = useState(300);
     const [maxVideoHeight, setMaxVideoHeight] = useState(200);
 
@@ -126,7 +127,12 @@ const Room = () => {
                                 });
                                 return newPeers;
                             })
-                        } else setMessages((prevMessages) => [...prevMessages, data]);
+                        } else{
+                            if (!showChat && data.userName !== userName) {
+                                setMessageUnread(prev => prev + 1);
+                            }
+                            setMessages((prevMessages) => [...prevMessages, data])
+                        };
                     });
         
                     return () => {
@@ -260,6 +266,11 @@ const Room = () => {
         navigate("/");
     };
 
+    const handleOpenChat = () => {
+        setShowChat(prev => !prev);
+        setMessageUnread(0);
+    }
+
     useEffect(()=>{
         if (containerRef?.current) {
             setMaxVideoWidth((containerRef.current.clientWidth - (showChat ? ( window.innerWidth > 768 ? 300 : 200 ): 0 ))/(peers.length / 2) - 20);            
@@ -299,9 +310,9 @@ const Room = () => {
                         />
                     ))}
                 </div>
-                {showChat && <Chat name={userName} messages={messages} sendMessage={sendMessage}/>}
+                {showChat && <Chat name={userName} messages={messages} sendMessage={sendMessage} />}
             </div>
-            <CallBar toggleMute={toggleMute} toggleVideo={toggleVideo} leaveCall={leaveRoom} isMuted={isMuted} isVideoEnabled={isVideoEnabled} showChat={showChat} setShowChat={setShowChat}/>
+            <CallBar toggleMute={toggleMute} toggleVideo={toggleVideo} leaveCall={leaveRoom} isMuted={isMuted} isVideoEnabled={isVideoEnabled} showChat={showChat} setShowChat={handleOpenChat} messageUnread={messageUnread}/>
         </div>
     );
 };

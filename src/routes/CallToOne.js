@@ -22,6 +22,7 @@ function CallToOne() {
 	const [ name, setName ] = useState("")
 	const [ userName, setUserName ] = useState("")
     const [messages, setMessages] = useState([]);
+    const [messageUnread, setMessageUnread] = useState(0);
 
 	const [ errorMessage, setErrorMessage ] = useState("")
 	const [isMuted, setIsMuted] = useState(false)
@@ -80,7 +81,12 @@ function CallToOne() {
 						setSecUserLeft(false);
 					}, 3000);
 				}
-			} else setMessages((prevMessages) => [...prevMessages, data]);
+			} else {
+				if (!showChat && data.userName !== name) {
+					setMessageUnread(prev => prev + 1);
+				}
+				setMessages((prevMessages) => [...prevMessages, data])
+			};
 			});
 
 			return () => {
@@ -101,7 +107,11 @@ function CallToOne() {
 	}
     const sendMessage = (data) => {
         if (data.message) {
-            socket.emit('sendMessage', data);
+            const messageData = {
+                ...data,
+                to: caller || idToCall
+            };
+            socket.emit('sendMessage', messageData);
         }
     };
 
@@ -278,7 +288,7 @@ function CallToOne() {
 				{secUserLeft && <div className="absolute top-0 sm:bottom-[62px] w-full h-[40px] bg-gray-400 p-2 text-white text-center transition-all">User Left the call</div>}
 			</div>
 			{callAccepted && !callEnded && (
-				<CallBar toggleMute={toggleMute} toggleVideo={toggleVideo} leaveCall={leaveCall} isMuted={isMuted} isVideoEnabled={isVideoEnabled} showChat={showChat} setShowChat={setShowChat}/>
+				<CallBar toggleMute={toggleMute} toggleVideo={toggleVideo} leaveCall={leaveCall} isMuted={isMuted} isVideoEnabled={isVideoEnabled} showChat={showChat} setShowChat={setShowChat} messageUnread={messageUnread}/>
 			)}
 			{showChat && <Chat name={name} messages={messages} sendMessage={sendMessage}/>}
 		</div>
