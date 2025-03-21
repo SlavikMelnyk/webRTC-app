@@ -69,7 +69,6 @@ io.on("connection", (socket) => {
 
 	socket.on("sendMessage", (message) => {
 		const roomID = socketToRoom[socket.id];
-		console.log(roomMessages[roomID]);
 		
 		if (roomID) {
 			if (!roomMessages[roomID]) {
@@ -80,6 +79,7 @@ io.on("connection", (socket) => {
 			io.to(roomID).emit("receiveMessage", message);
 		} else {
 			io.to(message.to).emit("receiveMessage", message);
+			io.to(socket.id).emit("receiveMessage", message);
 		}
 	});
 	socket.on("join room", ({ roomID, userName }) => {

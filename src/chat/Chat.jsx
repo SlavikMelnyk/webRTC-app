@@ -1,7 +1,8 @@
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { SiGooglemessages } from "react-icons/si";
 const Chat = ({ name, messages, sendMessage }) => {
     const inputRef = useRef();
+    const messagesRef = useRef();
     const [message, setMessage] = useState('');
 
     const handleSendMessage =()=>{
@@ -19,9 +20,16 @@ const Chat = ({ name, messages, sendMessage }) => {
             handleSendMessage();
         }
     }
+
+    useEffect(() => {
+        if (messagesRef.current) {
+            messagesRef.current.scrollTop = messagesRef.current.scrollHeight;
+        }
+    }, [messages]);
+
     return (
         <div className='absolute z-10 top-[10px] right-[10px] bg-white text-center rounded-md w-[200px] sm:w-[300px] h-fit' style={{ maxHeight: 'calc(100% - 86px)', display: 'flex', flexDirection: 'column' }}>
-            <div className='px-2 flex-grow overflow-y-auto'>
+            <div ref={messagesRef} className='px-2 flex-grow overflow-y-auto'>
                 {messages.length > 0 ? (
                     messages.map((msg, index) => (
                         <div key={index} style={{ maxHeight: 'calc(100% - 114px)', overflowY: 'auto' }} >

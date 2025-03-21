@@ -8,7 +8,7 @@ import Chat from '../chat/Chat';
 import { FaRegUser } from "react-icons/fa";
 import { FaMicrophoneLinesSlash } from "react-icons/fa6";
 
-const socket = io("https://webrtc-app-04ea.onrender.com");
+const SOCKET_SERVER = process.env.REACT_APP_SOCKET_SERVER || "https://webrtc-app-04ea.onrender.com";
 function CallToOne() {
 	const [ me, setMe ] = useState("")
 	const [ stream, setStream ] = useState()
@@ -31,11 +31,22 @@ function CallToOne() {
 	const [secUserSoundEnabled, setSecUserSoundEnabled] = useState(true);
 	const [secUserLeft, setSecUserLeft] = useState(false);
 
+	const socketRef = useRef();
 	const myVideo = useRef()
 	const userVideo = useRef()
 	const connectionRef= useRef()
 
 	useEffect(() => {
+		socketRef.current = io(SOCKET_SERVER, {
+            transports: ['websocket', 'polling'],
+            upgrade: true,
+            reconnection: true,
+            reconnectionAttempts: 5,
+            reconnectionDelay: 1000,
+            timeout: 10000,
+            withCredentials: true
+        });
+
 		if (navigator.mediaDevices) {			
 			navigator.mediaDevices.getUserMedia({ video: true, audio: true })
 				.then((stream) => {
@@ -52,18 +63,18 @@ function CallToOne() {
 				});
 		}
 
-		socket.on("me", (id) => {
+		socketRef.current.on("me", (id) => {
 				setMe(id)
 			})
 
-		socket.on("callUser", (data) => {
+		socketRef.current.on("callUser", (data) => {
 			setReceivingCall(true)
 			setCaller(data.from)
 			setUserName(data.name)
 			setCallerSignal(data.signal)
 		})
 
-		socket.on('receiveMessage', (data) => {
+		socketRef.current.on('receiveMessage', (data) => {
 			if (data.message === 'video-settings') {
 				if (data.userName === userName) {
 					setSecUserVideoEnabled(prev => !prev)
@@ -90,7 +101,7 @@ function CallToOne() {
 			});
 
 			return () => {
-				socket.off('receiveMessage');
+				socketRef.current.off('receiveMessage');
 			};
 	}, [userName])
 
@@ -106,14 +117,18 @@ function CallToOne() {
 		setSecUserSoundEnabled(true);
 	}
     const sendMessage = (data) => {
-        if (data.message) {
-            const messageData = {
-                ...data,
-                to: caller || idToCall
-            };
-            socket.emit('sendMessage', messageData);
-        }
-    };
+		if (data.message) {
+			const messageData = {
+				...data,
+				to: caller || idToCall
+			};
+			if (!socketRef.current?.connected) {
+				console.error('Socket is not connected!');
+				return;
+			}	
+			socketRef.current.emit('sendMessage', messageData);
+		}
+	};
 
 	const callUser = (id) => {
 		if (!name) {
@@ -127,7 +142,7 @@ function CallToOne() {
 			stream: stream
 		})
 		peer.on("signal", (data) => {
-			socket.emit("callUser", {
+			socketRef.current.emit("callUser", {
 				userToCall: id,
 				signalData: data,
 				from: me,
@@ -143,7 +158,7 @@ function CallToOne() {
 				console.error("userVideo reference is not set yet.");
 			}
 		})
-		socket.on("callAccepted", (data) => {
+		socketRef.current.on("callAccepted", (data) => {
 			setCallAccepted(true)
 			setUserName(data.userName)
 			peer.signal(data.signal)
@@ -160,7 +175,7 @@ function CallToOne() {
 			stream: stream
 		})
 		peer.on("signal", (data) => {
-			socket.emit("answerCall", { 
+			socketRef.current.emit("answerCall", { 
 				signal: data, 
 				to: caller, 
 				userName: name
@@ -188,7 +203,7 @@ function CallToOne() {
                 message: 'userLeft-settings',
                 userName: name
             };
-            socket.emit('sendMessage', messageData);
+            socketRef.current.emit('sendMessage', messageData);
 			connectionRef.current?.destroy()
 		} else {
 			console.error("No active connection to leave.")
@@ -204,7 +219,7 @@ function CallToOne() {
 				message: 'sound-settings',
 				userName: name
 			};
-			socket.emit('sendMessage', messageData);
+			socketRef.current.emit('sendMessage', messageData);
 		}
 		setIsMuted(prev => !prev);
 	}
@@ -215,7 +230,7 @@ function CallToOne() {
             message: 'video-settings',
             userName: name
         };
-        socket.emit('sendMessage', messageData);
+        socketRef.current.emit('sendMessage', messageData);
 		if (stream) {
 			stream.getVideoTracks().forEach(track => {
 				track.enabled = !track.enabled;
@@ -246,7 +261,7 @@ function CallToOne() {
 							ref={userVideo} 
 							autoPlay
 							style={{ height: "100%" }}
-							className={`object-contain ${!secUserVideoEnabled && 'opacity-0'}`}
+							className={`object-contain ${!secUserVideoEnabled ? 'opacity-0' : ''}`}
 						/> 
 					</div>
 				}

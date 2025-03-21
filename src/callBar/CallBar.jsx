@@ -32,7 +32,7 @@ function CallBar({toggleMute, toggleVideo, leaveCall, isMuted, isVideoEnabled, s
 			</div>
 			<div className="relative w-[25%] flex flex-col items-center">
 				<button className="relative" onClick={handleShowChat}>
-					{messageUnread && !showChat ? <div className="absolute right-0 top-0 w-3 h-3 bg-red-500 rounded-full"/> : null}
+					{messageUnread && !showChat ? <div className="absolute -right-1 w-4 h-4 text-[11px] text-white bg-red-500 rounded-full fade-in">{messageUnread}</div> : null}
 					{showChat ? <PiChatCircleSlash size={30}/> : <PiChatCircleLight size={30} />}
 				</button>
 				<p className="text-sm cursor-pointer select-none" onClick={handleShowChat}>Chat</p>
