@@ -100,8 +100,9 @@ const Room = () => {
                     });
 
                     socketRef.current.on("chatHistory", (history) => {
-                        console.log("Chat history:", history, userName);
-                        setMessages(history);
+                        const filteredHistory = history.filter(msg => msg.message !== 'sound-settings' && msg.message !== 'video-settings' && msg.message !== 'user-left');
+                        console.log("Chat history:", history,filteredHistory, userName);
+                        setMessages(filteredHistory);
                     });
 
                     socketRef.current.on('receiveMessage', (data) => {
@@ -127,7 +128,7 @@ const Room = () => {
                                 });
                                 return newPeers;
                             })
-                        } else{
+                        } else {
                             if (!showChat && data.userName !== userName) {
                                 setMessageUnread(prev => prev + 1);
                             }
@@ -263,6 +264,11 @@ const Room = () => {
     };
 
     const leaveRoom = () => {
+        const messageData = {
+            message: 'user-left',
+            userName, 
+        };
+        socketRef.current.emit('sendMessage', messageData);
         navigate("/");
     };
 

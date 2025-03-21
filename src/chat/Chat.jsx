@@ -33,7 +33,11 @@ const Chat = ({ name, messages, sendMessage }) => {
                 {messages.length > 0 ? (
                     messages.map((msg, index) => (
                         <div key={index} style={{ maxHeight: 'calc(100% - 114px)', overflowY: 'auto' }} >
-                            {name === msg.userName ? ( 
+                            {msg.message === 'user-left' ? (
+                                <div className='flex flex-col w-full items-center'>
+                                    <p className='px-1 italic text-gray-500'>{msg.userName} left the room</p>
+                                </div>
+                            ) : name === msg.userName ? ( 
                                 <div className='flex flex-col w-full items-end'>
                                     <p className='px-1 font-bold'>{msg.userName}</p>
                                     <span className='w-fit bg-gray-200 rounded-md px-2'>{msg.message}</span>
