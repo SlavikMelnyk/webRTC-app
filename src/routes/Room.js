@@ -44,7 +44,7 @@ const Room = () => {
         socketRef.current.on("connect", () => {
             console.log("Connected to socket server with ID:", socketRef.current.id);
             
-            navigator.mediaDevices.getUserMedia({ video: true, audio: false })
+            navigator.mediaDevices.getUserMedia({ video: true, audio: true })
                 .then(stream => {
                     userVideo.current.srcObject = stream;
                     socketRef.current.emit("join room", { roomID, userName: name });
