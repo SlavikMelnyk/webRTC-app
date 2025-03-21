@@ -42,7 +42,7 @@ const Chat = ({ name, messages, sendMessage }) => {
                     <div className='opacity-60 mt-1' onClick={handleFocusInput}>Please send first message...</div>
                 )}
             </div>
-            <div className='flex border px-2 rounded-b-md gap-1 '>
+            <div className='flex border px-2 rounded-b-md gap-1 mt-1'>
                 <input
                     ref={inputRef}
                     className='py-1 focus:outline-none w-full'

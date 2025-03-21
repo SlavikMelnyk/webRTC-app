@@ -33,10 +33,10 @@ const io = socketIO(server, {
   }
 });
 
-const users = {}; // { roomID: [{ id: socketId, userName: string }] }
-const socketToRoom = {}; // { socketId: roomID }
+const users = {};
+const socketToRoom = {}; 
+const roomMessages = {}; 
 
-// Add this function to help debug room state
 const logRoomState = (roomID) => {
   console.log(`Room ${roomID} state:`, {
     users: users[roomID] || [],
@@ -68,7 +68,17 @@ io.on("connection", (socket) => {
 	})
 
 	socket.on("sendMessage", (message) => {
-		io.emit("receiveMessage", message);
+		const roomID = socketToRoom[socket.id];
+		console.log(roomMessages[roomID]);
+		
+		if (roomID) {
+			if (!roomMessages[roomID]) {
+				roomMessages[roomID] = [];
+			}
+			roomMessages[roomID].push(message);
+			
+			io.to(roomID).emit("receiveMessage", message);
+		}
 	});
 	socket.on("join room", ({ roomID, userName }) => {
         console.log(`User ${socket.id} (${userName}) joining room: ${roomID}`);
@@ -87,9 +97,12 @@ io.on("connection", (socket) => {
         users[roomID].push({ id: socket.id, userName });
         socketToRoom[socket.id] = roomID;
         
+        if (roomMessages[roomID]) {
+            socket.emit("chatHistory", roomMessages[roomID]);
+        }
+        
         const usersInThisRoom = users[roomID].filter(user => user.id !== socket.id);
         
-        // Log room state for debugging
         logRoomState(roomID);
         
         socket.emit("all users", usersInThisRoom);

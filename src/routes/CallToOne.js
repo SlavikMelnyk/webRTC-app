@@ -2,8 +2,8 @@ import React, { useEffect, useRef, useState } from "react"
 import Peer from "simple-peer"
 import io from "socket.io-client"
 import CallBar from "../callBar/CallBar";
-import CallAnswer from "../common/CallAnswer";
-import CallInput from "../callInput/CallInput";
+import CallAnswer from "../call-one-to-one/CallAnswer";
+import CallInput from "../call-one-to-one/CallInput";
 import Chat from '../chat/Chat';
 import { FaRegUser } from "react-icons/fa";
 import { FaMicrophoneLinesSlash } from "react-icons/fa6";
@@ -275,7 +275,7 @@ function CallToOne() {
 						callUser={callUser}
 					/>
 				}
-				{secUserLeft && <div className="absolute top-0 sm:bottom-[62px] w-full bg-gray-400 p-2 text-white text-center transition-all">User Left the call</div>}
+				{secUserLeft && <div className="absolute top-0 sm:bottom-[62px] w-full h-[40px] bg-gray-400 p-2 text-white text-center transition-all">User Left the call</div>}
 			</div>
 			{callAccepted && !callEnded && (
 				<CallBar toggleMute={toggleMute} toggleVideo={toggleVideo} leaveCall={leaveCall} isMuted={isMuted} isVideoEnabled={isVideoEnabled} showChat={showChat} setShowChat={setShowChat}/>

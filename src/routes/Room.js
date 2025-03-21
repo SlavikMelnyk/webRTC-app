@@ -2,63 +2,9 @@ import React, { useEffect, useRef, useState } from "react";
 import io from "socket.io-client";
 import Peer from "simple-peer";
 import { useParams, useNavigate } from "react-router-dom";
-import { v1 as uuid } from "uuid";
 import CallBar from "../callBar/CallBar";
 import Chat from "../chat/Chat";
-import { FaRegUser } from "react-icons/fa";
-import { FaMicrophoneLinesSlash } from "react-icons/fa6";
-
-const Video = (props) => {
-    const ref = useRef();
-    const maxVideoWidth = props.maxVideoWidth;
-    const maxVideoHeight = props.maxVideoHeight;
-    useEffect(() => {
-        props.peer.on("stream", stream => {
-            ref.current.srcObject = stream;
-        })
-    }, []);
-    if (props.peer.readable === false) {
-        return null;
-    }
-
-    return (
-        <div className='relative flex items-center justify-center'
-            style={{
-                maxWidth: window.innerWidth > 768 ? maxVideoWidth : 'auto',
-                maxHeight: window.innerWidth <= 768 ? maxVideoHeight : 'auto',
-            }}
-        >
-                {props.videoOff && (
-                    <div className="absolute top-0 left-0 flex flex-col justify-center items-center gap-2 text-white text-center w-full h-full">
-                        <FaRegUser className="mx-auto" size={40}/>
-                        <p>
-                            {props.userName}
-                        </p>
-                    </div>
-                )}
-                <video 
-                    className="rounded-lg shadow-lg max-w-full max-h-full" 
-                    playsInline 
-                    autoPlay 
-                    ref={ref}
-                    style={{ objectFit: 'cover' }}
-                />
-                {props.userName && (
-                    <div className='absolute flex items-center gap-1 top-2 left-2 text-white bg-black bg-opacity-50  px-2 py-1 rounded '>
-                        <span>
-                        {props.videoOff ? '' : props.userName}
-                        </span>
-                        {props.isMuted && <FaMicrophoneLinesSlash className="text-white"/>}
-                    </div>
-                )}
-        </div>
-    );
-}
-
-const videoConstraints = {
-    height: window.innerHeight / 2,
-    width: window.innerWidth / 2
-};
+import Video from "../room-call/Video";
 
 const SOCKET_SERVER = process.env.REACT_APP_SOCKET_SERVER || "https://webrtc-app-04ea.onrender.com";
 
@@ -80,7 +26,7 @@ const Room = () => {
     const navigate = useNavigate();
 
     useEffect(() => {
-        const name = prompt("Please enter your name") || "Anonymous";
+        const name = Math.random().toString(36).substring(2, 3);
         setUserName(name);
         console.log("Attempting to connect to:", SOCKET_SERVER);
 
@@ -97,7 +43,7 @@ const Room = () => {
         socketRef.current.on("connect", () => {
             console.log("Connected to socket server with ID:", socketRef.current.id);
             
-            navigator.mediaDevices.getUserMedia({ video: videoConstraints, audio: true })
+            navigator.mediaDevices.getUserMedia({ video: true, audio: false })
                 .then(stream => {
                     userVideo.current.srcObject = stream;
                     socketRef.current.emit("join room", { roomID, userName: name });
@@ -152,6 +98,11 @@ const Room = () => {
                         navigate("/create-room");
                     });
 
+                    socketRef.current.on("chatHistory", (history) => {
+                        console.log("Chat history:", history, userName);
+                        setMessages(history);
+                    });
+
                     socketRef.current.on('receiveMessage', (data) => {
                         if (data.message === 'sound-settings') {
                             setPeers(peers => {
@@ -180,6 +131,7 @@ const Room = () => {
         
                     return () => {
                         socketRef.current.off('receiveMessage');
+                        socketRef.current.off("chatHistory");
                     };
                 })
                 .catch(err => {
@@ -310,10 +262,10 @@ const Room = () => {
 
     useEffect(()=>{
         if (containerRef?.current) {
-            setMaxVideoWidth((containerRef?.current?.clientWidth - (showChat ? ( window.innerWidth > 768 ? 300 : 200 ): 0 ))/(peers.length / 2) - 20);            
-            setMaxVideoHeight((containerRef?.current?.clientHeight - 142)/ 3 - 30);
+            setMaxVideoWidth((containerRef.current.clientWidth - (showChat ? ( window.innerWidth > 768 ? 300 : 200 ): 0 ))/(peers.length / 2) - 20);            
+            setMaxVideoHeight(((containerRef.current.clientHeight - 182) / (peers.length / 2)) - 2);
         }
-    },[peers, containerRef?.current])
+    },[peers, showChat, containerRef?.current])
     
     return (
         <div ref={containerRef} className="flex flex-col min-h-screen">
@@ -331,23 +283,23 @@ const Room = () => {
                     Copy room URL
                 </button>}
                 <div className="flex gap-2">
-                {showChat && <Chat name={userName} messages={messages} sendMessage={sendMessage}/>}
                 </div>
             </div>
-            <div className={`flex-1 flex justify-center mb-[66px] p-2 sm:p-4 ${showChat ? 'w-[calc(100%-200px)] sm:w-[calc(100%-300px)]' : 'w-full'}`}>
-                <div className="grid grid-flow-col gap-4">
+            <div ref={containerRef} className={`flex-1 flex justify-center items-center mb-[66px] p-2 sm:p-4 w-full`}>
+                <div className="flex flex-col sm:flex-row h-full w-full gap-4">
                     {peers.map((peerObj, index) => (
                         <Video 
-                        key={index} 
-                        peer={peerObj.peer}
-                        userName={peerObj.userName || `Participant ${index + 1}`}
-                        isMuted={peerObj.isMuted}
-                        videoOff={peerObj.videoOff}
-                        maxVideoWidth={maxVideoWidth}
-                        maxVideoHeight={maxVideoHeight}
+                            key={index} 
+                            peer={peerObj.peer}
+                            userName={peerObj.userName || `Participant ${index + 1}`}
+                            isMuted={peerObj.isMuted}
+                            videoOff={peerObj.videoOff}
+                            maxVideoWidth={maxVideoWidth}
+                            maxVideoHeight={maxVideoHeight}
                         />
                     ))}
                 </div>
+                {showChat && <Chat name={userName} messages={messages} sendMessage={sendMessage}/>}
             </div>
             <CallBar toggleMute={toggleMute} toggleVideo={toggleVideo} leaveCall={leaveRoom} isMuted={isMuted} isVideoEnabled={isVideoEnabled} showChat={showChat} setShowChat={setShowChat}/>
         </div>
