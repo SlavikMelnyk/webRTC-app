@@ -53,7 +53,11 @@ const Room = () => {
                     userVideo.current.srcObject = stream;
                     socketRef.current.emit("join room", { roomID, userName: name });
 
-                    socketRef.current.on("all users", users => {
+                    socketRef.current.on("all users with history", data => {
+                        const { users, history } = data;
+                        const filteredHistory = history.filter(msg => msg.message !== 'sound-settings' && msg.message !== 'video-settings' && msg.message !== 'reaction-settings');
+                        console.log("Chat history:", history,filteredHistory, userName);
+                        setMessages(filteredHistory);
                         console.log("All users in room:", users);
                         const peers = [];
                         users.forEach(user => {
@@ -101,12 +105,6 @@ const Room = () => {
                     socketRef.current.on("room full", () => {
                         alert("Room is full!");
                         navigate("/create-room");
-                    });
-
-                    socketRef.current.on("chatHistory", (history) => {
-                        const filteredHistory = history.filter(msg => msg.message !== 'sound-settings' && msg.message !== 'video-settings' && msg.message !== 'reaction-settings');
-                        console.log("Chat history:", history,filteredHistory, userName);
-                        setMessages(filteredHistory);
                     });
 
                     socketRef.current.on('receiveMessage', (data) => {
