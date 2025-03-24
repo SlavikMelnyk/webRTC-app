@@ -22,7 +22,7 @@ const Video = ({
     }
     
     return (
-        <div className='relative flex items-center justify-center w-full h-full rounded-lg'
+        <div className='relative flex items-center justify-center w-full h-full rounded-lg select-none'
             style={{
                 maxWidth: window.innerWidth > 768 ? maxVideoWidth : 'auto',
                 maxHeight: window.innerWidth <= 768 ? maxVideoHeight : 'auto',

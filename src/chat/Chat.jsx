@@ -28,6 +28,15 @@ const Chat = ({ name, messages, sendMessage, showChat }) => {
     useEffect(()=>{
         if (showChat) {
             setIsClosing(null);
+            setTimeout(() => {
+                if (messagesRef.current) {
+                    messagesRef.current.scrollTo({
+                        top: messagesRef.current.scrollHeight,
+                        behavior: 'smooth'
+                    });
+
+                }
+            }, 200);
         } else {
             setIsClosing('closing');
             setTimeout(() => {
@@ -47,7 +56,7 @@ const Chat = ({ name, messages, sendMessage, showChat }) => {
     }
     
     return (
-        <div className={`absolute z-10 top-[10px] right-[10px] bg-white text-center rounded-md w-[200px] sm:w-[300px] h-fit ${isClosing === 'closing' ? 'animate-fadeOutRight' : 'animate-fadeInRight'}`} style={{ maxHeight: 'calc(100% - 86px)', display: 'flex', flexDirection: 'column' }}>
+        <div className={`absolute z-10 top-[10px] right-1 sm:right-[10px] bg-white text-center rounded-md w-[200px] sm:w-[300px] h-fit ${isClosing === 'closing' ? 'animate-fadeOutRight' : 'animate-fadeInRight'}`} style={{ maxHeight: 'calc(100% - 86px)', display: 'flex', flexDirection: 'column' }}>
             <div ref={messagesRef} className='px-2 flex-grow overflow-y-auto'>
                 {messages.length > 0 ? (
                     messages.map((msg, index) => (

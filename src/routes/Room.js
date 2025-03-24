@@ -5,6 +5,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import CallBar from "../callBar/CallBar";
 import Chat from "../chat/Chat";
 import Video from "../room-call/Video";
+import { TbCopyCheckFilled } from "react-icons/tb";
 
 const SOCKET_SERVER = process.env.REACT_APP_SOCKET_SERVER || "https://webrtc-app-04ea.onrender.com";
 
@@ -18,6 +19,7 @@ const Room = () => {
     const [messageUnread, setMessageUnread] = useState(0);
     const [maxVideoWidth, setMaxVideoWidth] = useState(300);
     const [maxVideoHeight, setMaxVideoHeight] = useState(200);
+    const [isCopied, setIsCopied] = useState(false);
 
     const socketRef = useRef();
     const userVideo = useRef();
@@ -293,6 +295,15 @@ const Room = () => {
         setMessageUnread(0);
     }
 
+    const handleCopyRoomURL = () => {
+        if (isCopied) return;
+        navigator.clipboard.writeText(window.location.href);
+        setIsCopied(true);
+        setTimeout(() => {
+            setIsCopied(false);
+        }, 2000);
+    }
+
     useEffect(()=>{
         if (containerRef?.current) {
             setMaxVideoWidth((containerRef.current.clientWidth - (showChat ? ( window.innerWidth > 768 ? 300 : 200 ): 0 ))/(peers.length / 2) - 20);            
@@ -312,8 +323,9 @@ const Room = () => {
                         className='rounded-lg shadow-lg object-cover sm:w-[200px] max-h-[60px] sm:max-h-[100px]'
                     />
                 </div>
-                {roomID && <button className="absolute top-[24px] sm:top-[42px] right-1 text-sm sm:text-base sm:right-4 text-end bg-gray-400 px-2 py-1 rounded-md" onClick={() => { navigator.clipboard.writeText(window.location.href); }} >
-                    Copy room URL
+                {roomID && <button className="select-none absolute top-[24px] sm:top-[42px] right-1 flex items-center justify-center text-sm sm:text-base sm:right-4 bg-gray-400 hover:bg-gray-200 transition-all duration-300 px-2 py-1 rounded-md w-[120px] sm:w-[160px]" onClick={handleCopyRoomURL} >
+                    {isCopied ? <TbCopyCheckFilled className="mr-2" /> : null}
+                    {isCopied ? 'Copied' : 'Copy room URL'}
                 </button>}
                 <div className="flex gap-2">
                 </div>

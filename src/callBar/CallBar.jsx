@@ -1,13 +1,22 @@
-import React from "react"
+import React, { useState } from "react"
 import "../App.css"
 import { FaMicrophoneLines, FaMicrophoneLinesSlash, FaVideoSlash, FaVideo } from "react-icons/fa6";
 import { FaPhoneSlash } from "react-icons/fa";
 import { PiChatCircleLight, PiChatCircleSlash } from "react-icons/pi";
 
 function CallBar({toggleMute, toggleVideo, leaveCall, isMuted, isVideoEnabled, showChat, setShowChat, messageUnread } ) {
+	const [isOpening, setIsOpening] = useState(false);
+
 	const handleShowChat = () =>{
-		setShowChat(prev => !prev)
+		setShowChat(prev => !prev);
+		if (!showChat && messageUnread) {
+			setIsOpening('closing');
+			setTimeout(() => {
+				setIsOpening('closed');
+			}, 300);
+		}
 	}
+
 	return (
 		<div className="absolute bottom-0 left-0 w-full bg-white  flex justify-around p-2 shadow-md">
 			<div className="w-[25%] flex flex-col items-center">
@@ -32,7 +41,7 @@ function CallBar({toggleMute, toggleVideo, leaveCall, isMuted, isVideoEnabled, s
 			</div>
 			<div className="relative w-[25%] flex flex-col items-center">
 				<button className="relative" onClick={handleShowChat}>
-					{messageUnread && !showChat ? <div className="absolute -right-1 w-4 h-4 text-[11px] text-white bg-red-500 rounded-full animate-fadeInTop">{messageUnread}</div> : null}
+					{((messageUnread && !showChat) || isOpening === 'closing') ? <div className={`absolute -right-1 w-4 h-4 text-[11px] text-white bg-red-500 rounded-full ${isOpening === 'closing' ? 'animate-fadeOutBottom' : 'animate-fadeInTop'}`}>{messageUnread || null}</div> : null}
 					{showChat ? <PiChatCircleSlash size={30}/> : <PiChatCircleLight size={30} />}
 				</button>
 				<p className="text-sm cursor-pointer select-none" onClick={handleShowChat}>Chat</p>
