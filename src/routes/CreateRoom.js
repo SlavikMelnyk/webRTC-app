@@ -25,7 +25,7 @@ const CreateRoom = () => {
                 </button>
                 <p className="mt-1 text-start text-sm w-full text-gray-700 max-w-[90vw] sm:max-w-[400px]">*share the room URL with others to join the conference</p>
             </div>
-            <p className="text-4xl">OR</p>
+            {/* <p className="text-4xl">OR</p>
             <div className="flex flex-col items-center justify-center h-full w-fit">
                 <h1 className="text-xl mb-4">Call One to One</h1>
                 <button 
@@ -35,7 +35,7 @@ const CreateRoom = () => {
                     Call
                 </button>
                 <p className="mt-1 text-start text-sm w-full text-gray-700 max-w-[90vw] sm:max-w-[400px]">*share your ID with other user to join the call</p>
-            </div>
+            </div> */}
         </div>
     );
 };

@@ -6,6 +6,7 @@ import CallBar from "../callBar/CallBar";
 import Chat from "../chat/Chat";
 import Video from "../room-call/Video";
 import { TbCopyCheckFilled } from "react-icons/tb";
+import { v4 as uuidv4 } from 'uuid';
 
 const SOCKET_SERVER = process.env.REACT_APP_SOCKET_SERVER || "https://webrtc-app-04ea.onrender.com";
 
@@ -20,6 +21,7 @@ const Room = () => {
     const [maxVideoWidth, setMaxVideoWidth] = useState(300);
     const [maxVideoHeight, setMaxVideoHeight] = useState(200);
     const [isCopied, setIsCopied] = useState(false);
+    const [reactions, setReactions] = useState([]);
 
     const socketRef = useRef();
     const userVideo = useRef();
@@ -102,7 +104,7 @@ const Room = () => {
                     });
 
                     socketRef.current.on("chatHistory", (history) => {
-                        const filteredHistory = history.filter(msg => msg.message !== 'sound-settings' && msg.message !== 'video-settings');
+                        const filteredHistory = history.filter(msg => msg.message !== 'sound-settings' && msg.message !== 'video-settings' && msg.message !== 'reaction-settings');
                         console.log("Chat history:", history,filteredHistory, userName);
                         setMessages(filteredHistory);
                     });
@@ -130,6 +132,12 @@ const Room = () => {
                                 });
                                 return newPeers;
                             })
+                        } else if (data.message === 'reaction-settings') {
+                            const newReaction = `${data.userName} : ${data.reaction}`;
+                            setReactions(prevReactions => [...prevReactions, newReaction]);
+                            setTimeout(() => {
+                                setReactions(prevReactions => prevReactions.filter(reaction => reaction !== newReaction));
+                            }, 3000);
                         } else {
                             if (!showChat && data.userName !== userName) {
                                 setMessageUnread(prev => prev + 1);
@@ -178,6 +186,17 @@ const Room = () => {
             socketRef.current.emit('sendMessage', data);
         }
     };
+
+    const handleSendReaction = (data) => {
+        const messageId = uuidv4();
+        const messageData = {
+            ...data,
+            message: 'reaction-settings',
+            userName, 
+            id: messageId
+        };
+        socketRef.current.emit('sendMessage', messageData);
+    }
 
     function createPeer(userToSignal, callerID, stream, userName) {
         const peer = new Peer({
@@ -346,7 +365,18 @@ const Room = () => {
                 </div>
                 <Chat name={userName} messages={messages} sendMessage={sendMessage} showChat={showChat} />
             </div>
-            <CallBar toggleMute={toggleMute} toggleVideo={toggleVideo} leaveCall={leaveRoom} isMuted={isMuted} isVideoEnabled={isVideoEnabled} showChat={showChat} setShowChat={handleOpenChat} messageUnread={messageUnread}/>
+            <CallBar 
+                toggleMute={toggleMute} 
+                isMuted={isMuted} 
+                toggleVideo={toggleVideo} 
+                isVideoEnabled={isVideoEnabled} 
+                leaveCall={leaveRoom} 
+                showChat={showChat} 
+                setShowChat={handleOpenChat} 
+                messageUnread={messageUnread}
+                sendReaction={handleSendReaction}
+                reactions={reactions}
+            />
         </div>
     );
 };

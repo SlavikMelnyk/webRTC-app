@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { SiGooglemessages } from "react-icons/si";
-
+import { v4 as uuidv4 } from 'uuid';
 const Chat = ({ name, messages, sendMessage, showChat }) => {
     const inputRef = useRef();
     const messagesRef = useRef();
@@ -8,7 +8,8 @@ const Chat = ({ name, messages, sendMessage, showChat }) => {
     const [isClosing, setIsClosing] = useState(null);
 
     const handleSendMessage = () => {
-        sendMessage({ message, userName: name });
+        const messageId = uuidv4();
+        sendMessage({ message, userName: name, id: messageId });
         setMessage('');
         handleFocusInput();
     }
