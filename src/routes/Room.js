@@ -283,7 +283,13 @@ const Room = () => {
     };
 
     const handleOpenChat = () => {
-        setShowChat(prev => !prev);
+        setShowChat(prev => {
+            if (prev) {
+                setTimeout(() => {
+                    return !prev
+                }, 500);
+            } return !prev
+        });
         setMessageUnread(0);
     }
 
@@ -326,7 +332,7 @@ const Room = () => {
                         />
                     ))}
                 </div>
-                {showChat && <Chat name={userName} messages={messages} sendMessage={sendMessage} />}
+                <Chat name={userName} messages={messages} sendMessage={sendMessage} showChat={showChat} />
             </div>
             <CallBar toggleMute={toggleMute} toggleVideo={toggleVideo} leaveCall={leaveRoom} isMuted={isMuted} isVideoEnabled={isVideoEnabled} showChat={showChat} setShowChat={handleOpenChat} messageUnread={messageUnread}/>
         </div>
