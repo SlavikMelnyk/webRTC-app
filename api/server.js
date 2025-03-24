@@ -97,13 +97,13 @@ io.on("connection", (socket) => {
 
         users[roomID].push({ id: socket.id, userName });
         socketToRoom[socket.id] = roomID;
+		const usersInThisRoom = users[roomID].filter(user => user.id !== socket.id);
+        
         
         if (roomMessages[roomID]) {
 			socket.emit("all users", usersInThisRoom);
 			socket.to(roomID).emit("chatHistory", roomMessages[roomID]);
         }
-        
-        const usersInThisRoom = users[roomID].filter(user => user.id !== socket.id);
         
         logRoomState(roomID);
         
