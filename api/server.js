@@ -102,8 +102,7 @@ io.on("connection", (socket) => {
         
         logRoomState(roomID);
         
-        socket.emit("all users", usersInThisRoom);
-		    socket.to(roomID).emit("chatHistory", roomMessages[roomID]);
+        socket.emit("all users with history", { users: usersInThisRoom, history: roomMessages[roomID] || [] });
         socket.to(roomID).emit("user joined", { 
             signal: socket.id, 
             callerID: socket.id,
