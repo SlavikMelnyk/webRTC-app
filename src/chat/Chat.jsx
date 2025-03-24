@@ -9,7 +9,8 @@ const Chat = ({ name, messages, sendMessage, showChat }) => {
 
     const handleSendMessage = () => {
         const messageId = uuidv4();
-        sendMessage({ message, userName: name, id: messageId });
+        const timestamp = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        sendMessage({ message, userName: name, id: messageId, timestamp });
         setMessage('');
         handleFocusInput();
     }
@@ -61,20 +62,33 @@ const Chat = ({ name, messages, sendMessage, showChat }) => {
             <div ref={messagesRef} className='px-2 flex-grow overflow-y-auto'>
                 {messages.length > 0 ? (
                     messages.map((msg, index) => (
-                        <div key={index} style={{ maxHeight: 'calc(100% - 114px)', overflowY: 'auto' }} >
+                        <div 
+                            key={index} 
+                            style={{ 
+                                maxHeight: 'calc(100% - 114px)', 
+                                overflowY: 'auto' 
+                            }} 
+                            onClick={()=> console.log(msg)}
+                        >
                             {msg.message === 'user-left' ? (
                                 <div className='flex flex-col w-full items-center'>
                                     <p className='px-1 italic text-gray-500'>{msg.userName} left the room</p>
                                 </div>
                             ) : name === msg.userName ? (
-                                <div className='flex flex-col w-full items-end'>
+                                <div className='flex  flex-col w-full items-end text-end'>
                                     <p className='px-1 font-bold'>{msg.userName}</p>
-                                    <span className='w-fit bg-gray-200 rounded-md px-2'>{msg.message}</span>
+                                    <div className='flex flex-col w-fit bg-gray-200 rounded-md px-2'>
+                                        <span>{msg.message}</span>
+                                        <span className='text-gray-400 italic text-xs'>{msg.timestamp}</span>
+                                    </div>
                                 </div>
                             ) : (
-                                <div className='flex flex-col w-full items-start'>
+                                <div className='flex flex-col w-full items-start text-start'>
                                     <p className='px-1 font-bold'>{msg.userName}</p>
-                                    <span className='w-fit bg-gray-300 rounded-md px-2'>{msg.message}</span>
+                                    <div className='flex flex-col w-fit bg-gray-200 rounded-md px-2'>
+                                        <span>{msg.message}</span>
+                                        <span className='text-gray-400 italic text-xs'>{msg.timestamp}</span>
+                                    </div>
                                 </div>
                             )}
                         </div>
@@ -93,7 +107,7 @@ const Chat = ({ name, messages, sendMessage, showChat }) => {
                     onKeyDown={handleKeyDown}
                     placeholder="Type a message..."
                 />
-                <button onClick={handleSendMessage}>
+                <button className='disabled:opacity-50' onClick={handleSendMessage} disabled={message.length === 0}>
                     <SiGooglemessages size={25} />
                 </button>
             </div>
