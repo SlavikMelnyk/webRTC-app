@@ -100,14 +100,10 @@ io.on("connection", (socket) => {
 		const usersInThisRoom = users[roomID].filter(user => user.id !== socket.id);
         
         
-        if (roomMessages[roomID]) {
-			socket.emit("all users", usersInThisRoom);
-			socket.to(roomID).emit("chatHistory", roomMessages[roomID]);
-        }
-        
         logRoomState(roomID);
         
         socket.emit("all users", usersInThisRoom);
+		    socket.to(roomID).emit("chatHistory", roomMessages[roomID]);
         socket.to(roomID).emit("user joined", { 
             signal: socket.id, 
             callerID: socket.id,
