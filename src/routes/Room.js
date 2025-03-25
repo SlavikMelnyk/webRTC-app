@@ -50,7 +50,7 @@ const Room = () => {
         socketRef.current.on("connect", () => {
             console.log("Connected to socket server with ID:", socketRef.current.id);
             
-            navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+            navigator.mediaDevices.getUserMedia({ video: true, audio: false })
                 .then(stream => {
                     userVideo.current.srcObject = stream;
                     socketRef.current.emit("join room", { roomID, userName: name });
@@ -345,7 +345,7 @@ const Room = () => {
         if (containerRef?.current) {
             const filteredPeers = peers.filter(peer => peer.peer.readable);
             // const maxVideoWidth = (containerRef.current.clientWidth - (showChat ? ( window.innerWidth > 768 ? 332 : 232 ): 32 ))/filteredPeers.length - (16 * (filteredPeers.length -1));
-            const maxVideoHeight = ((containerRef.current.clientHeight - 182) / filteredPeers.length) - 20;
+            const maxVideoHeight = ((containerRef.current.clientHeight - 176) / filteredPeers.length) - 5;
             // console.log(maxVideoWidth);
             // setMaxVideoWidth(filteredPeers.length ? maxVideoWidth : containerRef.current.clientWidth);            
             setMaxVideoHeight(window.innerWidth < 768 ? maxVideoHeight : containerRef.current.clientHeight - 192);
@@ -384,7 +384,7 @@ const Room = () => {
                 </div>
             </div>
             <div ref={containerRef} className={`flex-1 flex justify-center items-center mb-[66px] p-2 sm:p-4 w-full`}>
-                <div className="grid grid-cols-1 sm:grid-cols-3 h-full w-full gap-1 sm:gap-4 -mt-6 sm:mt-0">
+                <div className="grid sm:grid-cols-3 h-full w-full gap-1 sm:gap-4">
                     {peers.map((peerObj, index) => (
                         <Video 
                             key={index} 
