@@ -35,10 +35,9 @@ const Video = ({
                     playsInline 
                     autoPlay 
                     ref={ref}
-                    style={
-                        window.innerWidth < 768 ? {
+                    style={{
                         maxHeight: maxVideoHeight,
-                    } : {}}
+                    }}
                 /> 
                 {userName && (
                     <div className='absolute flex items-center gap-1 top-2 left-2 text-white bg-black bg-opacity-50  px-2 py-1 rounded '>
