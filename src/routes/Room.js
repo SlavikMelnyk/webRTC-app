@@ -20,7 +20,9 @@ const Room = () => {
     const [showChat, setShowChat] = useState(false)
     const [messages, setMessages] = useState([]);
     const [messageUnread, setMessageUnread] = useState(0);
-    const [maxVideoWidth, setMaxVideoWidth] = useState(300);
+    // const [maxVideoWidth, setMaxVideoWidth] = useState(300);
+    const [userVideoHeight, setUserVideoHeight] = useState(100);
+
     const [maxVideoHeight, setMaxVideoHeight] = useState(200);
     const [isCopied, setIsCopied] = useState(false);
     const [reactions, setReactions] = useState([]);
@@ -29,6 +31,7 @@ const Room = () => {
     const userVideo = useRef();
     const peersRef = useRef([]);
     const containerRef = useRef();
+    const containeкResizeRef = useRef();
     const { roomID } = useParams();
     const navigate = useNavigate();
 
@@ -348,25 +351,32 @@ const Room = () => {
             const maxVideoHeight = ((containerRef.current.clientHeight - 176) / filteredPeers.length) - 5;
             // console.log(maxVideoWidth);
             // setMaxVideoWidth(filteredPeers.length ? maxVideoWidth : containerRef.current.clientWidth);            
-            setMaxVideoHeight(window.innerWidth < 768 ? maxVideoHeight : containerRef.current.clientHeight - 192);
+            setMaxVideoHeight(window.innerWidth < 768 ? maxVideoHeight : containerRef.current.clientHeight - 214);
         }
     },[peers, showChat, containerRef?.current])
+
+    if (containeкResizeRef?.current) {
+        new ResizeObserver(() => setUserVideoHeight(containeкResizeRef.current?.clientHeight * 0.9)).observe(containeкResizeRef.current);
+    }
     
     return (
-        <div ref={containerRef} className="flex flex-col min-h-screen overflow-hidden">
-            <div className="flex justify-center items-center p-2 sm:p-4 bg-gray-800 h-[76px] sm:h-[116px]">
-                <div className={`relative flex items-center justify-center w-[100px] sm:w-[200px] max-h-[60px] sm:max-h-[100px] z-10 bg-transparent ${isVideoEnabled ? 'opacity-100' : 'opacity-0'}`}>
+        <div className="flex flex-col min-h-screen overflow-hidden">
+            <div ref={containeкResizeRef} className="flex justify-center items-center p-2 sm:p-4 bg-gray-800 resize-y overflow-auto">
+                <div className={`relative flex items-center justify-center z-10 bg-transparent ${isVideoEnabled ? 'opacity-100' : 'opacity-0'}`}>
                     <video
                         muted
                         ref={userVideo}
                         autoPlay
                         playsInline
-                        className='rounded-lg shadow-lg object-cover sm:w-[200px] max-h-[60px] sm:max-h-[100px]'
+                        className='rounded-lg shadow-lg object-cover'
+                        style={{height: userVideoHeight}}
                     />
                 </div>
                 {roomID && 
-                    <div className="select-none absolute top-0 h-[76px] sm:h-[116px] left-1  
-                                flex flex-col items-center justify-around text-sm sm:text-base sm:left-4">
+                    <div 
+                        className="select-none absolute top-0 left-1 flex flex-col items-center justify-around text-sm sm:text-base sm:left-4"
+                        style={{height: userVideoHeight}}
+                    >
                         <button 
                             className="flex items-center justify-center bg-gray-400 hover:bg-gray-200 transition-all duration-300 
                                 px-2 py-1 rounded-md w-[120px] sm:w-[160px]" 
@@ -380,8 +390,6 @@ const Room = () => {
                         </p>
                     </div>
                 }
-                <div className="flex gap-2">
-                </div>
             </div>
             <div ref={containerRef} className={`flex-1 flex justify-center items-center mb-[66px] p-2 sm:p-4 w-full`}>
                 <div className="grid sm:grid-cols-3 h-full w-full gap-1 sm:gap-4">
