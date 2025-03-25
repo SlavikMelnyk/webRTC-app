@@ -55,7 +55,7 @@ const Room = () => {
 
                     socketRef.current.on("all users with history", data => {
                         const { users, history } = data;
-                        const filteredHistory = history.filter(msg => msg.message !== 'sound-settings' && msg.message !== 'video-settings' && msg.message !== 'reaction-settings');
+                        const filteredHistory = history.filter(msg => msg.message !== 'sound-settings' && msg.message !== 'video-settings' && msg.message !== 'reaction-settings' && msg.message !== 'user-left' && msg.message !== 'user-joined');
                         console.log("Chat history:", history,filteredHistory, userName);
                         setMessages(filteredHistory);
                         console.log("All users in room:", users);
@@ -84,6 +84,12 @@ const Room = () => {
                             userName: payload.userName
                         });
                         setPeers(users => [...users, { peer, userName: payload.userName }]);
+                        setMessages((prevMessages) => {
+                            if (prevMessages[prevMessages?.length - 1]?.userName != payload.userName) {
+                                return [...prevMessages, {message: 'user-joined', userName: payload.userName}]
+                            }
+                            return prevMessages;
+                            })
                     });
 
                     socketRef.current.on("receiving returned signal", payload => {
@@ -104,7 +110,7 @@ const Room = () => {
 
                     socketRef.current.on("room full", () => {
                         alert("Room is full!");
-                        navigate("/create-room");
+                        navigate("/");
                     });
 
                     socketRef.current.on('receiveMessage', (data) => {
@@ -146,7 +152,7 @@ const Room = () => {
         
                     return () => {
                         socketRef.current.off('receiveMessage');
-                        socketRef.current.off("chatHistory");
+                        socketRef.current.off('user left');
                     };
                 })
                 .catch(err => {
@@ -164,7 +170,19 @@ const Room = () => {
             console.log("Disconnected from server");
         });
 
+        const handleBeforeUnload = () => {
+            const messageData = {
+                message: 'user-left',
+                userName : name, 
+            };
+            socketRef.current.emit('sendMessage', messageData);
+            socketRef.current.emit('user left', socketRef.current.id);
+        };
+
+        window.addEventListener('beforeunload', handleBeforeUnload);
+
         return () => {
+            window.removeEventListener('beforeunload', handleBeforeUnload());
             if (socketRef.current) {
                 socketRef.current.disconnect();
             }

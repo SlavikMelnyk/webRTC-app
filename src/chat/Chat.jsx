@@ -72,7 +72,11 @@ const Chat = ({ name, messages, sendMessage, showChat }) => {
                         >
                             {msg.message === 'user-left' ? (
                                 <div className='flex flex-col w-full items-center'>
-                                    <p className='px-1 italic text-gray-500'>{msg.userName} left the room</p>
+                                    <p className='px-1 italic text-red-400'>{msg.userName} left the room</p>
+                                </div>
+                            ) : msg.message === 'user-joined' ? (
+                                <div className='flex flex-col w-full items-center'>
+                                    <p className='px-1 italic text-green-500'>{msg.userName} joined the room</p>
                                 </div>
                             ) : name === msg.userName ? (
                                 <div className='flex  flex-col w-full items-end text-end'>
