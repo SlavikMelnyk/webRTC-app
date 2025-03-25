@@ -21,10 +21,10 @@ function CallBarItem({children, label, textColor, onClick, tooltipText, ...props
 			{...props}
 		>
 			{children}
-			{tooltipText && isHovered ? <div className={`absolute select-none -top-[20px] bg-gray-200 w-[200px] px-2 sm:w-fit rounded-lg ${isHidding ? 'animate-fadeOutBottom' : 'animate-fadeInTop'}`}>
+			{tooltipText && isHovered ? <div className={`absolute hidden sm:block select-none -top-[20px] bg-gray-200 w-[200px] px-2 sm:w-fit rounded-lg ${isHidding ? 'animate-fadeOutBottom' : 'animate-fadeInTop'}`}>
 				{tooltipText}
 			</div> : null}
-			<p className='text-sm cursor-pointer select-none' onClick={onClick}>
+			<p className='text-xs sm:text-sm cursor-pointer select-none' onClick={onClick}>
 				{label}
 			</p>
 		</div>
