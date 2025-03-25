@@ -7,11 +7,13 @@ import Chat from "../chat/Chat";
 import Video from "../room-call/Video";
 import { TbCopyCheckFilled } from "react-icons/tb";
 import { v4 as uuidv4 } from 'uuid';
+import { useUser } from "../context/UserContext";
 
 const SOCKET_SERVER = process.env.REACT_APP_SOCKET_SERVER || "https://webrtc-app-04ea.onrender.com";
 
 const Room = () => {
     const [peers, setPeers] = useState([]);
+    const { myName } = useUser();
     const [userName, setUserName] = useState("");
     const [isMuted, setIsMuted] = useState(false);
     const [isVideoEnabled, setIsVideoEnabled] = useState(true);
@@ -32,7 +34,7 @@ const Room = () => {
 
     useEffect(() => {
         const symbol = Math.random().toString(36).substring(2, 3)
-        const name = window.outerWidth >= 1920 ? 'Desktop-' + symbol : window.outerWidth >= 1512 ? 'Laptop-' + symbol : 'Mobile-' + symbol;
+        const name = myName ? myName : window.outerWidth >= 1920 ? 'Desktop-' + symbol : window.outerWidth >= 1512 ? 'Laptop-' + symbol : 'Mobile-' + symbol;
         setUserName(name);
 
         socketRef.current = io(SOCKET_SERVER, {
@@ -347,7 +349,7 @@ const Room = () => {
     },[peers, showChat, containerRef?.current])
     
     return (
-        <div ref={containerRef} className="flex flex-col min-h-screen">
+        <div ref={containerRef} className="flex flex-col min-h-screen overflow-hidden">
             <div className="flex justify-center items-center p-2 sm:p-4 bg-gray-800 h-[76px] sm:h-[116px]">
                 <div className={`relative flex items-center justify-center w-[100px] sm:w-[200px] max-h-[60px] sm:max-h-[100px] z-10 bg-transparent ${isVideoEnabled ? 'opacity-100' : 'opacity-0'}`}>
                     <video

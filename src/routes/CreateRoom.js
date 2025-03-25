@@ -1,9 +1,11 @@
 import React from "react";
 import { v1 as uuid } from "uuid";
 import { useNavigate } from "react-router-dom";
+import { useUser } from "../context/UserContext";
 
 const CreateRoom = () => {
     const navigate = useNavigate();
+    const { myName, setMyName } = useUser();
 
     const createNewRoom = () => {
         const id = uuid();
@@ -13,8 +15,18 @@ const CreateRoom = () => {
     const calllOneToOne = () => {
         window.location.href = '/call-to-one';
     }
+
     return (
         <div className="flex flex-col text-center items-center justify-center gap-10 min-h-screen">
+            <div className="flex flex-col items-center justify-center h-full w-fit">
+                <h1 className="text-xl mb-4">Please enter your name</h1>
+                <input 
+                    type="text" 
+                    value={myName} 
+                    onChange={(e) => setMyName(e.target.value)}
+                    className="mb-4 p-2 border rounded-md w-[90vw] sm:w-[400px] h-[50px]"
+                />
+            </div>
             <div className="flex flex-col items-center justify-center h-full w-fit">
                 <h1 className="text-xl mb-4">Create a Conference Room</h1>
                 <button 
