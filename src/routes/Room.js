@@ -348,7 +348,7 @@ const Room = () => {
             const maxVideoHeight = ((containerRef.current.clientHeight - 182) / filteredPeers.length) - 2;
             // console.log(maxVideoWidth);
             // setMaxVideoWidth(filteredPeers.length ? maxVideoWidth : containerRef.current.clientWidth);            
-            setMaxVideoHeight(maxVideoHeight);
+            setMaxVideoHeight(window.innerWidth < 768 ? maxVideoHeight : containerRef.current.clientHeight - 182);
         }
     },[peers, showChat, containerRef?.current])
     
