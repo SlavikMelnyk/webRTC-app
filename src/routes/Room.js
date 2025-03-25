@@ -343,8 +343,12 @@ const Room = () => {
 
     useEffect(()=>{
         if (containerRef?.current) {
-            setMaxVideoWidth((containerRef.current.clientWidth - (showChat ? ( window.innerWidth > 768 ? 300 : 200 ): 0 ))/(peers.length / 2) - 20);            
-            setMaxVideoHeight(((containerRef.current.clientHeight - 182) / (peers.length / 2)) - 2);
+            const filteredPeers = peers.filter(peer => peer.peer.readable);
+            // const maxVideoWidth = (containerRef.current.clientWidth - (showChat ? ( window.innerWidth > 768 ? 332 : 232 ): 32 ))/filteredPeers.length - (16 * (filteredPeers.length -1));
+            const maxVideoHeight = ((containerRef.current.clientHeight - 182) / filteredPeers.length) - 2;
+            // console.log(maxVideoWidth);
+            // setMaxVideoWidth(filteredPeers.length ? maxVideoWidth : containerRef.current.clientWidth);            
+            setMaxVideoHeight(maxVideoHeight);
         }
     },[peers, showChat, containerRef?.current])
     
@@ -380,7 +384,7 @@ const Room = () => {
                 </div>
             </div>
             <div ref={containerRef} className={`flex-1 flex justify-center items-center mb-[66px] p-2 sm:p-4 w-full`}>
-                <div className="flex flex-col sm:flex-row h-full w-full gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-3 h-full w-full gap-1 sm:gap-4">
                     {peers.map((peerObj, index) => (
                         <Video 
                             key={index} 
@@ -388,7 +392,7 @@ const Room = () => {
                             userName={peerObj.userName || `Participant ${index + 1}`}
                             isMuted={peerObj.isMuted}
                             videoOff={peerObj.videoOff}
-                            maxVideoWidth={maxVideoWidth}
+                            // maxVideoWidth={maxVideoWidth}
                             maxVideoHeight={maxVideoHeight}
                         />
                     ))}

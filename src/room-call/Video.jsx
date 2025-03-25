@@ -7,7 +7,6 @@ const Video = ({
     userName,
     isMuted,
     videoOff,
-    maxVideoWidth,
     maxVideoHeight 
 }) => {
     const ref = useRef();
@@ -22,12 +21,7 @@ const Video = ({
     }
     
     return (
-        <div className='relative flex items-center justify-center w-full h-full rounded-lg select-none'
-            style={{
-                maxWidth: window.innerWidth > 768 ? maxVideoWidth : 'auto',
-                maxHeight: window.innerWidth <= 768 ? maxVideoHeight : 'auto',
-            }}
-        >
+        <div className='relative flex items-center justify-center w-full h-full rounded-lg select-none'>
                 {videoOff && (
                     <div className="absolute top-0 left-0 flex flex-col justify-center items-center gap-2 text-white text-center w-full h-full">
                         <FaRegUser className="mx-auto" size={40}/>
@@ -37,14 +31,15 @@ const Video = ({
                     </div>
                 )}
                 <video 
-                    className="rounded-lg shadow-lg max-w-full max-h-full" 
+                    className="rounded-lg shadow-lg" 
                     playsInline 
                     autoPlay 
                     ref={ref}
-                    style={{ 
-                        objectFit: 'contain',
-                    }}
-                />
+                    style={
+                        window.innerWidth < 768 ? {
+                        maxHeight: maxVideoHeight,
+                    } : {}}
+                /> 
                 {userName && (
                     <div className='absolute flex items-center gap-1 top-2 left-2 text-white bg-black bg-opacity-50  px-2 py-1 rounded '>
                         <span>
