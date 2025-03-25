@@ -7,7 +7,19 @@ import { CiFaceSmile } from "react-icons/ci";
 import CallBarItem from "./CallBarItem";
 import { emojiReactions } from "./emojiReactions";
 
-function CallBar({toggleMute, toggleVideo, leaveCall, isMuted, isVideoEnabled, showChat, setShowChat, messageUnread, sendReaction, reactions }) {
+function CallBar(
+	{
+		toggleMute, 
+		toggleVideo, 
+		leaveCall, 
+		isMuted, 
+		isVideoEnabled, 
+		showChat, 
+		setShowChat, 
+		messageUnread, 
+		sendReaction, 
+		reactions 
+	}) {
 	const [isOpening, setIsOpening] = useState(false);
 	const [openReaction, setOpenReaction] = useState(false);
 	const [isHiding, setIsHiding] = useState(false);
@@ -39,6 +51,7 @@ function CallBar({toggleMute, toggleVideo, leaveCall, isMuted, isVideoEnabled, s
 			<CallBarItem 
 				label={isMuted? 'Unmute' : 'Mute'}
 				onClick={toggleMute}
+				tooltipText={isMuted ? 'Click to unmute' : 'Click to mute'}
 			>
 				<button onClick={toggleMute}>
 					{isMuted ? <FaMicrophoneLinesSlash size={30} />  : <FaMicrophoneLines size={30} />}
@@ -47,6 +60,7 @@ function CallBar({toggleMute, toggleVideo, leaveCall, isMuted, isVideoEnabled, s
 			<CallBarItem 
 				label={isVideoEnabled ? 'Stop camera' : 'Show camera'}
 				onClick={toggleVideo}
+				tooltipText={isVideoEnabled ? 'Click to hide you' : 'Click to show you'}
 			>
 				<button onClick={toggleVideo}>
 					{isVideoEnabled ? <FaVideoSlash size={30} /> : <FaVideo size={30} />}
@@ -56,6 +70,7 @@ function CallBar({toggleMute, toggleVideo, leaveCall, isMuted, isVideoEnabled, s
 				label='Leave'
 				onClick={leaveCall}
 				textColor="#FF0000"
+				tooltipText='Click to leave the call'
 			>
 				<button onClick={leaveCall}>
 					<FaPhoneSlash size={30}/>
@@ -72,12 +87,15 @@ function CallBar({toggleMute, toggleVideo, leaveCall, isMuted, isVideoEnabled, s
 				}}
 			>
 				{openReaction ? ( 
-					<div className={`absolute select-none -top-[110px] sm:-top-[100px] grid grid-cols-6 gap-1 bg-gray-200 w-[200px] sm:w-fit rounded-lg ${isHiding ? 'animate-fadeOutBottom' : 'animate-fadeInTop'}`}>
-						{emojiReactions.map((item, index) => (
-							<button key={index} onClick={() => handleReaction(item.emoji)} className="p-1">
-								{item.emoji}
-							</button>
-						))}
+					<div className={`absolute select-none -top-[130px] sm:-top-[125px]  bg-gray-200 w-[200px] sm:w-fit rounded-lg ${isHiding ? 'animate-fadeOutBottom' : 'animate-fadeInTop'}`}>
+						<div className="grid grid-cols-6 gap-1">
+							{emojiReactions.map((item, index) => (
+								<button key={index} onClick={() => handleReaction(item.emoji)} className="p-1 hover:bg-gray-300 rounded-md">
+									{item.emoji}
+								</button>
+							))}
+						</div>
+						<p>Click to send reaction</p>
 					</div>
 					) : null}
 				<button className="relative" onClick={() => handleReaction(emojiReactions[0].emoji)}>
@@ -90,6 +108,7 @@ function CallBar({toggleMute, toggleVideo, leaveCall, isMuted, isVideoEnabled, s
 			<CallBarItem 
 				label='Chat'
 				onClick={handleShowChat}
+				tooltipText={showChat ? 'Click to close chat' : 'Click to open chat'}
 			>
 				<button className="relative" onClick={handleShowChat}>
 					{((messageUnread && !showChat) || isOpening === 'closing') ? <div className={`absolute -right-1 w-4 h-4 text-[11px] text-white bg-red-500 rounded-full ${isOpening === 'closing' ? 'animate-fadeOutBottom' : 'animate-fadeInTop'}`}>{messageUnread || null}</div> : null}

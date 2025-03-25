@@ -31,9 +31,9 @@ const Room = () => {
     const navigate = useNavigate();
 
     useEffect(() => {
-        const name = Math.random().toString(36).substring(2, 3);
+        const symbol = Math.random().toString(36).substring(2, 3)
+        const name = window.outerWidth >= 1920 ? 'Desktop-' + symbol : window.outerWidth >= 1512 ? 'Laptop-' + symbol : 'Mobile-' + symbol;
         setUserName(name);
-        console.log("Attempting to connect to:", SOCKET_SERVER);
 
         socketRef.current = io(SOCKET_SERVER, {
             transports: ['websocket', 'polling'],
@@ -358,10 +358,22 @@ const Room = () => {
                         className='rounded-lg shadow-lg object-cover sm:w-[200px] max-h-[60px] sm:max-h-[100px]'
                     />
                 </div>
-                {roomID && <button className="select-none absolute top-[24px] sm:top-[42px] right-1 flex items-center justify-center text-sm sm:text-base sm:right-4 bg-gray-400 hover:bg-gray-200 transition-all duration-300 px-2 py-1 rounded-md w-[120px] sm:w-[160px]" onClick={handleCopyRoomURL} >
-                    {isCopied ? <TbCopyCheckFilled className="mr-2" /> : null}
-                    {isCopied ? 'Copied' : 'Copy room URL'}
-                </button>}
+                {roomID && 
+                    <div className="select-none absolute top-0 h-[76px] sm:h-[116px] left-1  
+                                flex flex-col items-center justify-around text-sm sm:text-base sm:left-4">
+                        <button 
+                            className="flex items-center justify-center bg-gray-400 hover:bg-gray-200 transition-all duration-300 
+                                px-2 py-1 rounded-md w-[120px] sm:w-[160px]" 
+                            onClick={handleCopyRoomURL}
+                        >
+                            {isCopied ? <TbCopyCheckFilled className="mr-2" /> : null}
+                            {isCopied ? 'Copied' : 'Copy room URL'}
+                        </button>
+                        <p className="text-white">
+                            {userName}
+                        </p>
+                    </div>
+                }
                 <div className="flex gap-2">
                 </div>
             </div>
