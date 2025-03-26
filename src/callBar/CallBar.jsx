@@ -2,6 +2,7 @@ import React, { useState } from "react"
 import "../App.css"
 import { FaMicrophoneLines, FaMicrophoneLinesSlash, FaVideoSlash, FaVideo } from "react-icons/fa6";
 import { FaPhoneSlash, FaDesktop } from "react-icons/fa";
+import { MdDesktopAccessDisabled } from "react-icons/md";
 import { PiChatCircleLight, PiChatCircleSlash } from "react-icons/pi";
 import { CiFaceSmile } from "react-icons/ci";
 import CallBarItem from "./CallBarItem";
@@ -56,6 +57,12 @@ function CallBar(
 		}, 300);
 	}
 	
+	const handleToggleVideo = () => {
+		if (isScreenSharing) {
+			toggleScreenShare()
+		} else toggleVideo()
+	}
+
 	return (
 		<div className="absolute bottom-0 left-0 w-full bg-white text-center flex justify-around shadow-md">
 			<CallBarItem 
@@ -77,7 +84,7 @@ function CallBar(
 					setOpenStream(true)
 				}}
 			>
-				{openStream ? ( 
+				{openStream && !isScreenSharing ? ( 
 					<div className={`absolute select-none -top-[40px] sm:-top-[35px]  bg-gray-200 w-[200px] sm:w-fit rounded-lg ${isHiding ? 'animate-fadeOutBottom' : 'animate-fadeInTop'}`}>
 						<div className="grid grid-cols-2 gap-2">
 							<button className="flex justify-center items-center p-1 hover:bg-gray-300 rounded-md" onClick={toggleScreenShare}>
@@ -89,8 +96,8 @@ function CallBar(
 						</div>
 					</div>
 					) : null}
-				<button onClick={toggleVideo}>
-					{isScreenSharing ? <FaDesktop size={30} /> : isVideoEnabled ? <FaVideoSlash size={30} /> : <FaVideo size={30} />}
+				<button onClick={handleToggleVideo}>
+					{isScreenSharing ? <MdDesktopAccessDisabled size={30} /> : isVideoEnabled ? <FaVideoSlash size={30} /> : <FaVideo size={30} />}
 				</button>
 			</CallBarItem>
 			<CallBarItem 

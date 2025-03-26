@@ -123,6 +123,21 @@ const Room = () => {
         };
     }, [roomID]);
 
+    useEffect(() => {
+        if (isScreenSharing) {
+            (async () => {
+                const stream = await navigator.mediaDevices.getDisplayMedia({ video: true });
+                userVideo.current.srcObject = stream;
+                replaceVideoTrack(stream);
+            })();
+        } else {
+            (async () => {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+                userVideo.current.srcObject = stream;
+            })();
+        }
+    }, [isScreenSharing]);
+
     const sendMessage = (data) => {
         if (data.message || data.file) {
             socketRef.current.emit('sendMessage', data);
@@ -140,64 +155,12 @@ const Room = () => {
         socketRef.current.emit('sendMessage', messageData);
     }
 
-    function createPeer(userToSignal, callerID, stream, userName) {
-        const peer = new Peer({
-            initiator: true,
-            trickle: false,
-            stream,
-            config: {
-                iceServers: [
-                    { urls: 'stun:stun.l.google.com:19302' },
-                    { urls: 'stun:global.stun.twilio.com:3478' }
-                ]
-            }
+    const replaceVideoTrack = (newTrack) => {
+        peersRef.current.forEach(({ peer }) => {
+            const sender = peer._pc.getSenders().find(s => s.track.kind === 'video');
+            if (sender) sender.replaceTrack(newTrack);
         });
-
-        peer.on("signal", signal => {
-            socketRef.current.emit("sending signal", {
-                userToSignal,
-                callerID,
-                signal,
-                userName
-            });
-        });
-
-        peer.on("error", error => {
-            console.error("Peer connection error:", error);
-        });
-
-        return peer;
-    }
-
-    function addPeer(incomingSignal, callerID, stream) {
-        const peer = new Peer({
-            initiator: false,
-            trickle: false,
-            stream,
-            config: {
-                iceServers: [
-                    { urls: 'stun:stun.l.google.com:19302' },
-                    { urls: 'stun:global.stun.twilio.com:3478' }
-                ]
-            }
-        });
-
-        peer.on("signal", signal => {
-            socketRef.current.emit("returning signal", { signal, callerID });
-        });
-
-        peer.on("error", error => {
-            console.error("Peer connection error:", error);
-        });
-
-        peer.on("stream", stream => {
-            console.log("Received stream from peer:", stream);
-        });
-
-        peer.signal(incomingSignal);
-        return peer;
-    }
-
+    };
     const toggleMute = () => {
         if (userVideo.current.srcObject) {
             const audioTrack = userVideo.current.srcObject.getAudioTracks()[0];
@@ -209,6 +172,53 @@ const Room = () => {
 			};
 			socketRef.current.emit('sendMessage', messageData);
             setIsMuted(!isMuted);
+        }
+    };
+
+    const toggleScreenShare = async () => {
+        if (!isScreenSharing) {
+            try {
+                const screenStream = await navigator.mediaDevices.getDisplayMedia({ video: true });
+    
+                const screenTrack = screenStream.getVideoTracks()[0];
+                screenTrack.onended = () => {
+                    stopScreenShare();
+                };
+    
+                const sender = userVideo.current.srcObject.getVideoTracks()[0];
+                userVideo.current.srcObject.removeTrack(sender);
+                userVideo.current.srcObject.addTrack(screenTrack);
+    
+                peersRef.current.forEach(({ peer }) => {
+                    const sender = peer._pc.getSenders().find(s => s.track.kind === "video");
+                    if (sender) sender.replaceTrack(screenTrack);
+                });
+    
+                setIsScreenSharing(true);
+            } catch (err) {
+                console.error("Screen sharing error:", err);
+            }
+        } else {
+            stopScreenShare();
+        }
+    };
+    
+    const stopScreenShare = async () => {        
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+            const videoTrack = stream.getVideoTracks()[0];
+    
+            userVideo.current.srcObject.getTracks().forEach(track => track.stop()); // Stop current screen sharing tracks
+            userVideo.current.srcObject = stream;
+    
+            peersRef.current.forEach(({ peer }) => {
+                const sender = peer._pc.getSenders().find(s => s.track?.kind === "video");
+                if (sender) sender.replaceTrack(videoTrack);
+            });
+    
+            setIsScreenSharing(false);
+        } catch (err) {
+            console.error("Error stopping screen share and switching back to camera:", err);
         }
     };
 
@@ -347,7 +357,7 @@ const Room = () => {
                 sendReaction={handleSendReaction}
                 reactions={reactions}
                 isScreenSharing={isScreenSharing}
-                toggleScreenShare = {()=> setIsScreenSharing(prev => !prev)}
+                toggleScreenShare={toggleScreenShare}
             />
         </div>
     );
