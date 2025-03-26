@@ -8,6 +8,7 @@ import Video from "../room-call/Video";
 import { TbCopyCheckFilled } from "react-icons/tb";
 import { v4 as uuidv4 } from 'uuid';
 import { useUser } from "../context/UserContext";
+import { setupSocketHandlers } from "../utils/socketHandlers";
 
 const SOCKET_SERVER = process.env.REACT_APP_SOCKET_SERVER || "https://webrtc-app-04ea.onrender.com";
 
@@ -27,6 +28,7 @@ const Room = () => {
     const [maxVideoHeight, setMaxVideoHeight] = useState(200);
     const [isCopied, setIsCopied] = useState(false);
     const [reactions, setReactions] = useState([]);
+    const [isScreenSharing, setIsScreenSharing] = useState(false);
 
     const socketRef = useRef();
     const userVideo = useRef();
@@ -59,103 +61,21 @@ const Room = () => {
                     userVideo.current.srcObject = stream;
                     socketRef.current.emit("join room", { roomID, userName: name });
 
-                    socketRef.current.on("all users with history", data => {
-                        const { users, history } = data;
-                        const filteredHistory = history.filter(msg => msg.message !== 'sound-settings' && msg.message !== 'video-settings' && msg.message !== 'reaction-settings' && msg.message !== 'user-left' && msg.message !== 'user-joined');
-                        console.log("Chat history:", history,filteredHistory, userName);
-                        setMessages(filteredHistory);
-                        console.log("All users in room:", users);
-                        const peers = [];
-                        users.forEach(user => {
-                            const peer = createPeer(user.id, socketRef.current.id, stream, name);
-                            peersRef.current.push({
-                                peerID: user.id,
-                                peer,
-                                userName: user.userName
-                            });
-                            peers.push({
-                                peer,
-                                userName: user.userName
-                            });
-                        });
-                        setPeers(peers);
-                    });
+                    setupSocketHandlers(
+                        socketRef,
+                        userVideo,
+                        stream,
+                        name,
+                        roomID,
+                        setPeers,
+                        peersRef,
+                        setMessages,
+                        showChat,
+                        setMessageUnread,
+                        navigate,
+                        setReactions
+                    );
 
-                    socketRef.current.on("user joined", payload => {
-                        console.log("User joined:", payload);
-                        const peer = addPeer(payload.signal, payload.callerID, stream);
-                        peersRef.current.push({
-                            peerID: payload.callerID,
-                            peer,
-                            userName: payload.userName
-                        });
-                        setPeers(users => [...users, { peer, userName: payload.userName }]);
-                        setMessages((prevMessages) => {
-                            if (prevMessages[prevMessages?.length - 1]?.userName != payload.userName) {
-                                return [...prevMessages, {message: 'user-joined', userName: payload.userName}]
-                            }
-                            return prevMessages;
-                            })
-                    });
-
-                    socketRef.current.on("receiving returned signal", payload => {
-                        const item = peersRef.current.find(p => p.peerID === payload.id);
-                        if (item) {
-                            item.peer.signal(payload.signal);
-                        }
-                    });
-
-                    socketRef.current.on("user left", userId => {
-                        const peerObj = peersRef.current.find(p => p.peerID === userId);
-                        if (peerObj) {
-                            peerObj.peer.destroy();
-                            peersRef.current = peersRef.current.filter(p => p.peerID !== userId);
-                            setPeers(peers => peers.filter(p => p.peerID !== userId));
-                        }
-                    });
-
-                    socketRef.current.on("room full", () => {
-                        alert("Room is full!");
-                        navigate("/");
-                    });
-
-                    socketRef.current.on('receiveMessage', (data) => {
-                        if (data.message === 'sound-settings') {
-                            setPeers(peers => {
-                                const newPeers = [...peers];
-                                
-                                newPeers.forEach(peer => {
-                                    if (peer.userName === data.userName) {
-                                        peer.isMuted = !data.sound;
-                                    }
-                                });
-                                return newPeers;
-                            })
-                        } else if (data.message === 'video-settings') {
-                            setPeers(peers => {
-                                const newPeers = [...peers];
-                                
-                                newPeers.forEach(peer => {
-                                    if (peer.userName === data.userName) {
-                                        peer.videoOff = !data.video;
-                                    }
-                                });
-                                return newPeers;
-                            })
-                        } else if (data.message === 'reaction-settings') {
-                            const newReaction = `${data.userName} : ${data.reaction}`;
-                            setReactions(prevReactions => [...prevReactions, newReaction]);
-                            setTimeout(() => {
-                                setReactions(prevReactions => prevReactions.filter(reaction => reaction !== newReaction));
-                            }, 3000);
-                        } else {
-                            if (!showChat && data.userName !== userName) {
-                                setMessageUnread(prev => prev + 1);
-                            }
-                            setMessages((prevMessages) => [...prevMessages, data])
-                        };
-                    });
-        
                     return () => {
                         socketRef.current.off('receiveMessage');
                         socketRef.current.off('user left');
@@ -293,7 +213,9 @@ const Room = () => {
     };
 
     const toggleVideo = () => {
-        if (userVideo.current.srcObject) {
+        if (isScreenSharing) {
+            setIsScreenSharing(false);
+        } else if (userVideo.current.srcObject) {
             const videoTrack = userVideo.current.srcObject.getVideoTracks()[0];
             videoTrack.enabled = !videoTrack.enabled;
             const messageData = {
@@ -424,6 +346,8 @@ const Room = () => {
                 messageUnread={messageUnread}
                 sendReaction={handleSendReaction}
                 reactions={reactions}
+                isScreenSharing={isScreenSharing}
+                toggleScreenShare = {()=> setIsScreenSharing(prev => !prev)}
             />
         </div>
     );

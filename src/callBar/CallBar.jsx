@@ -1,7 +1,7 @@
 import React, { useState } from "react"
 import "../App.css"
 import { FaMicrophoneLines, FaMicrophoneLinesSlash, FaVideoSlash, FaVideo } from "react-icons/fa6";
-import { FaPhoneSlash } from "react-icons/fa";
+import { FaPhoneSlash, FaDesktop } from "react-icons/fa";
 import { PiChatCircleLight, PiChatCircleSlash } from "react-icons/pi";
 import { CiFaceSmile } from "react-icons/ci";
 import CallBarItem from "./CallBarItem";
@@ -18,10 +18,13 @@ function CallBar(
 		setShowChat, 
 		messageUnread, 
 		sendReaction, 
-		reactions 
+		reactions,
+		isScreenSharing,
+		toggleScreenShare
 	}) {
 	const [isOpening, setIsOpening] = useState(false);
 	const [openReaction, setOpenReaction] = useState(false);
+	const [openStream, setOpenStream] = useState(false);
 	const [isHiding, setIsHiding] = useState(false);
 
 	const handleShowChat = () =>{
@@ -45,6 +48,13 @@ function CallBar(
 			setIsHiding(false)
 		}, 300);
 	}
+	const handleHideStream = ()=> {
+		setIsHiding(true);
+		setTimeout(() =>{ 
+			setOpenStream(false)
+			setIsHiding(false)
+		}, 300);
+	}
 	
 	return (
 		<div className="absolute bottom-0 left-0 w-full bg-white text-center flex justify-around shadow-md">
@@ -58,12 +68,29 @@ function CallBar(
 				</button>
 			</CallBarItem>
 			<CallBarItem 
-				label={isVideoEnabled ? 'Stop camera' : 'Show camera'}
+				label={isScreenSharing ? 'Stop sharing' : isVideoEnabled ? 'Stop camera' : 'Show camera'}
 				onClick={toggleVideo}
-				tooltipText={isVideoEnabled ? 'Click to hide you' : 'Click to show you'}
+				onMouseEnter={() => setOpenStream(true)} 
+				onMouseLeave={handleHideStream}
+				onContextMenu={(e) =>{ 
+					e.preventDefault(); 
+					setOpenStream(true)
+				}}
 			>
+				{openStream ? ( 
+					<div className={`absolute select-none -top-[40px] sm:-top-[35px]  bg-gray-200 w-[200px] sm:w-fit rounded-lg ${isHiding ? 'animate-fadeOutBottom' : 'animate-fadeInTop'}`}>
+						<div className="grid grid-cols-2 gap-2">
+							<button className="flex justify-center items-center p-1 hover:bg-gray-300 rounded-md" onClick={toggleScreenShare}>
+								<FaDesktop size={20} />
+							</button>
+							<button className="flex justify-center items-center p-1 hover:bg-gray-300 rounded-md" onClick={toggleVideo}>
+								{isVideoEnabled ? <FaVideoSlash size={30} /> : <FaVideo size={30} />}
+							</button>
+						</div>
+					</div>
+					) : null}
 				<button onClick={toggleVideo}>
-					{isVideoEnabled ? <FaVideoSlash size={30} /> : <FaVideo size={30} />}
+					{isScreenSharing ? <FaDesktop size={30} /> : isVideoEnabled ? <FaVideoSlash size={30} /> : <FaVideo size={30} />}
 				</button>
 			</CallBarItem>
 			<CallBarItem 

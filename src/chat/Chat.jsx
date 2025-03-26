@@ -182,6 +182,9 @@ const FileIcon = ({ fileToDownload, setTooltip, index }) => {
                 setTooltip({ text: fileToDownload?.name, index, x: e.clientX, y: e.clientY });
             }}
             onMouseLeave={() => setTooltip(null)}
+            onContextMenu={(e) => {
+                    setTooltip({ text: fileToDownload?.name, index, x: e.clientX, y: e.clientY });
+            }}
         >
             <FiFile />
         </a>
