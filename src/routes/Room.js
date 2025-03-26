@@ -204,7 +204,7 @@ const Room = () => {
     }, [roomID]);
 
     const sendMessage = (data) => {
-        if (data.message) {
+        if (data.message || data.file) {
             socketRef.current.emit('sendMessage', data);
         }
     };
