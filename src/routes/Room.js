@@ -353,7 +353,7 @@ const Room = () => {
             // setMaxVideoWidth(filteredPeers.length ? maxVideoWidth : containerRef.current.clientWidth);            
             setMaxVideoHeight(window.innerWidth < 768 ? maxVideoHeight : containerRef.current.clientHeight - 214);
         }
-    },[peers, showChat, containerRef?.current])
+    },[peers, showChat, containerRef?.current, userVideoHeight])
 
     if (containeкResizeRef?.current) {
         new ResizeObserver(() => setUserVideoHeight(containeкResizeRef.current?.clientHeight * 0.9)).observe(containeкResizeRef.current);
@@ -361,7 +361,7 @@ const Room = () => {
     
     return (
         <div className="flex flex-col min-h-screen overflow-hidden">
-            <div ref={containeкResizeRef} className="flex justify-center items-center p-2 sm:p-4 bg-gray-800 resize-y overflow-auto">
+            <div ref={containeкResizeRef} className="flex justify-center items-center p-2 sm:p-4 bg-gray-800 resize-y overflow-auto h-[76px] sm:h-[116px] min-h-[76px] sm:min-h-[116px]">
                 <div className={`relative flex items-center justify-center z-10 bg-transparent ${isVideoEnabled ? 'opacity-100' : 'opacity-0'}`}>
                     <video
                         muted

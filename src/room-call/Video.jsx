@@ -39,8 +39,8 @@ const Video = ({
                         maxHeight: maxVideoHeight,
                     }}
                 /> 
-                {(userName || isMuted)  && (
-                    <div className='absolute flex items-center gap-1 top-2 left-2 text-white bg-black bg-opacity-50  px-2 py-1 rounded '>
+                {(!videoOff || isMuted)  && (
+                    <div className='absolute flex items-center gap-1 top-2 left-2 text-white bg-black bg-opacity-50  px-2 py-1 rounded'>
                         <span>
                         {videoOff ? '' : userName}
                         </span>
