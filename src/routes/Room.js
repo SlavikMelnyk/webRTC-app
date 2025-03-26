@@ -1,6 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
 import io from "socket.io-client";
-import Peer from "simple-peer";
 import { useParams, useNavigate } from "react-router-dom";
 import CallBar from "../callBar/CallBar";
 import Chat from "../chat/Chat";
@@ -9,6 +8,7 @@ import { TbCopyCheckFilled } from "react-icons/tb";
 import { v4 as uuidv4 } from 'uuid';
 import { useUser } from "../context/UserContext";
 import { setupSocketHandlers } from "../utils/socketHandlers";
+import { useIsMobile } from "../utils/isMobile";
 
 const SOCKET_SERVER = process.env.REACT_APP_SOCKET_SERVER || "https://webrtc-app-04ea.onrender.com";
 
@@ -37,6 +37,7 @@ const Room = () => {
     const containeкResizeRef = useRef();
     const { roomID } = useParams();
     const navigate = useNavigate();
+    const {isMobile} = useIsMobile();
 
     useEffect(() => {
         const symbol = Math.random().toString(36).substring(2, 3)
@@ -285,7 +286,7 @@ const Room = () => {
             const maxVideoHeight = ((containerRef.current.clientHeight - 176) / filterPeers.length) - 5;
             // console.log(maxVideoWidth);
             // setMaxVideoWidth(filteredPeers.length ? maxVideoWidth : containerRef.current.clientWidth);            
-            setMaxVideoHeight(window.innerWidth < 768 ? maxVideoHeight : containerRef.current.clientHeight - 66);
+            setMaxVideoHeight(isMobile ? maxVideoHeight : containerRef.current.clientHeight - 66);
         }
     },[peers, showChat, containerRef?.current, userVideoHeight])
 
@@ -327,7 +328,7 @@ const Room = () => {
             </div>
             <div ref={containerRef} className={`flex-1 flex justify-center sm:items-center mb-[66px] p-2 sm:p-4 w-full`}>
                 <div className="grid h-full w-full gap-1 sm:gap-4"                    
-                    style={window.innerWidth > 768 ? {
+                    style={!isMobile ? {
                         gridTemplateColumns: `repeat(${filteredPeers.length}, 1fr)`
                     } : {}}
                 >

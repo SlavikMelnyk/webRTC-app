@@ -7,6 +7,7 @@ import { PiChatCircleLight, PiChatCircleSlash } from "react-icons/pi";
 import { CiFaceSmile } from "react-icons/ci";
 import CallBarItem from "./CallBarItem";
 import { emojiReactions } from "./emojiReactions";
+import { useIsMobile } from "../utils/isMobile";
 
 function CallBar(
 	{
@@ -27,6 +28,7 @@ function CallBar(
 	const [openReaction, setOpenReaction] = useState(false);
 	const [openStream, setOpenStream] = useState(false);
 	const [isHiding, setIsHiding] = useState(false);
+	const {isMobile} = useIsMobile();
 
 	const handleShowChat = () =>{
 		setShowChat(prev => !prev);
@@ -77,11 +79,13 @@ function CallBar(
 			<CallBarItem 
 				label={isScreenSharing ? 'Stop sharing' : isVideoEnabled ? 'Stop camera' : 'Show camera'}
 				onClick={toggleVideo}
-				onMouseEnter={() => setOpenStream(true)} 
+				onMouseEnter={() => setOpenStream(isMobile ? false : true)} 
 				onMouseLeave={handleHideStream}
 				onContextMenu={(e) =>{ 
 					e.preventDefault(); 
-					setOpenStream(true)
+					if (!isMobile) {
+						setOpenStream(true)
+					}
 				}}
 			>
 				{openStream && !isScreenSharing ? ( 
