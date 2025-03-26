@@ -13,6 +13,7 @@ const SOCKET_SERVER = process.env.REACT_APP_SOCKET_SERVER || "https://webrtc-app
 
 const Room = () => {
     const [peers, setPeers] = useState([]);
+    const [filteredPeers, setFilteredPeers] = useState([]);
     const { myName } = useUser();
     const [userName, setUserName] = useState("");
     const [isMuted, setIsMuted] = useState(false);
@@ -346,12 +347,13 @@ const Room = () => {
 
     useEffect(()=>{
         if (containerRef?.current) {
-            const filteredPeers = peers.filter(peer => peer.peer.readable);
+            const filterPeers = peers.filter(peer => peer.peer.readable);
+            setFilteredPeers(filterPeers);
             // const maxVideoWidth = (containerRef.current.clientWidth - (showChat ? ( window.innerWidth > 768 ? 332 : 232 ): 32 ))/filteredPeers.length - (16 * (filteredPeers.length -1));
-            const maxVideoHeight = ((containerRef.current.clientHeight - 176) / filteredPeers.length) - 5;
+            const maxVideoHeight = ((containerRef.current.clientHeight - 176) / filterPeers.length) - 5;
             // console.log(maxVideoWidth);
             // setMaxVideoWidth(filteredPeers.length ? maxVideoWidth : containerRef.current.clientWidth);            
-            setMaxVideoHeight(window.innerWidth < 768 ? maxVideoHeight : containerRef.current.clientHeight - 214);
+            setMaxVideoHeight(window.innerWidth < 768 ? maxVideoHeight : containerRef.current.clientHeight - 66);
         }
     },[peers, showChat, containerRef?.current, userVideoHeight])
 
@@ -361,7 +363,7 @@ const Room = () => {
     
     return (
         <div className="flex flex-col min-h-screen overflow-hidden">
-            <div ref={containeкResizeRef} className="flex justify-center items-center p-2 sm:p-4 bg-gray-800 resize-y overflow-auto h-[76px] sm:h-[116px] min-h-[76px] sm:min-h-[116px]">
+            <div ref={containeкResizeRef} className="flex justify-center items-center p-2 sm:p-4 bg-gray-800 resize-y overflow-hidden h-[76px] sm:h-[116px] min-h-[76px] sm:min-h-[116px]">
                 <div className={`relative flex items-center justify-center z-10 bg-transparent ${isVideoEnabled ? 'opacity-100' : 'opacity-0'}`}>
                     <video
                         muted
@@ -392,7 +394,11 @@ const Room = () => {
                 }
             </div>
             <div ref={containerRef} className={`flex-1 flex justify-center sm:items-center mb-[66px] p-2 sm:p-4 w-full`}>
-                <div className="grid sm:grid-cols-3 h-full w-full gap-1 sm:gap-4">
+                <div className="grid h-full w-full gap-1 sm:gap-4"                    
+                    style={window.innerWidth > 768 ? {
+                        gridTemplateColumns: `repeat(${filteredPeers.length}, 1fr)`
+                    } : {}}
+                >
                     {peers.map((peerObj, index) => (
                         <Video 
                             key={index} 
