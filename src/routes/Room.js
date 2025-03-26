@@ -391,7 +391,7 @@ const Room = () => {
                     </div>
                 }
             </div>
-            <div ref={containerRef} className={`flex-1 flex justify-center items-center mb-[66px] p-2 sm:p-4 w-full`}>
+            <div ref={containerRef} className={`flex-1 flex justify-center sm:items-center mb-[66px] p-2 sm:p-4 w-full`}>
                 <div className="grid sm:grid-cols-3 h-full w-full gap-1 sm:gap-4">
                     {peers.map((peerObj, index) => (
                         <Video 
