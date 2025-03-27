@@ -168,7 +168,7 @@ const Room = () => {
 
     const handleCopyRoomURL = () => {
         if (isCopied) return;
-        navigator.clipboard.writeText(window.location.href);
+        navigator.clipboard.writeText(window.location.href.replace('room', 'lobby'));
         setIsCopied(true);
         setTimeout(() => {
             setIsCopied(false);
@@ -191,6 +191,11 @@ const Room = () => {
             
             navigator.mediaDevices.getUserMedia({ video: true, audio: true })
                 .then(stream => {
+                    const audioTrack = stream.getAudioTracks()[0];
+                    const videoTrack = stream.getVideoTracks()[0];
+                    audioTrack.enabled = !isMuted;
+                    videoTrack.enabled = isVideoEnabled;
+
                     userVideo.current.srcObject = stream;
                     socketRef.current.emit("join room", { roomID, userName: myName });
 

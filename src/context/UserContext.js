@@ -3,8 +3,7 @@ import React, { createContext, useState, useContext } from 'react';
 const UserContext = createContext();
 
 export const UserProvider = ({ children }) => {
-    const symbol = Math.random().toString(36).substring(2, 3)
-    const [myName, setMyName] = useState(window.outerWidth >= 1920 ? 'Desktop-' + symbol : window.outerWidth >= 1512 ? 'Laptop-' + symbol : 'Mobile-' + symbol);
+    const [myName, setMyName] = useState('');
     const [isMuted, setIsMuted] = useState(false);
     const [isVideoEnabled, setIsVideoEnabled] = useState(true);
 

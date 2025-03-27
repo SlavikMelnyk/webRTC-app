@@ -4,6 +4,7 @@ import CallToOne from './routes/CallToOne';
 import CreateRoom from './routes/CreateRoom';
 import Room from './routes/Room';
 import { UserProvider } from './context/UserContext';
+import Lobby from './routes/Lobby';
 
 function App() {
 	return (
@@ -12,6 +13,7 @@ function App() {
 				<Routes>
 					<Route path="/" element={<CreateRoom />} />
 					<Route path="/call-to-one" element={<CallToOne />} />
+					<Route path="/lobby/:roomID" element={<Lobby />} />
 					<Route path="/room/:roomID" element={<Room />} />
 				</Routes>
 			</BrowserRouter>
