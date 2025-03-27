@@ -7,8 +7,9 @@ export const UserProvider = ({ children }) => {
     const [isMuted, setIsMuted] = useState(false);
     const [isVideoEnabled, setIsVideoEnabled] = useState(true);
     const [isBlurred, setIsBlurred] = useState(true);
+    const [selectedBackground, setSelectedBackground] = useState('none');
     return (
-        <UserContext.Provider value={{ myName, setMyName, isMuted, setIsMuted, isVideoEnabled, setIsVideoEnabled, isBlurred, setIsBlurred }}>
+        <UserContext.Provider value={{ myName, setMyName, isMuted, setIsMuted, isVideoEnabled, setIsVideoEnabled, isBlurred, setIsBlurred, selectedBackground, setSelectedBackground }}>
             {children}
         </UserContext.Provider>
     );

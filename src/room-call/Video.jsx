@@ -75,7 +75,7 @@ const Video = ({
                     </div>
                 )}
                 <video 
-                    className="rounded-lg cover shadow-lg w-full h-full" 
+                    className={`rounded-lg cover shadow-lg w-full h-full ${!videoOff ? 'opacity-100' : 'opacity-0'}`}
                     playsInline 
                     autoPlay 
                     ref={ref}

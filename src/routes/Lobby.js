@@ -12,7 +12,7 @@ const backgroundOptions = {
 };
 
 const Lobby = () => {
-    const { myName, setMyName, isMuted, setIsMuted, isVideoEnabled, setIsVideoEnabled, isBlurred, setIsBlurred } = useUser();
+    const { myName, setMyName, isMuted, setIsMuted, isVideoEnabled, setIsVideoEnabled, isBlurred, setIsBlurred, selectedBackground, setSelectedBackground } = useUser();
     const { roomID } = useParams();
     const navigate = useNavigate();
 
@@ -23,7 +23,6 @@ const Lobby = () => {
 
     const [name, setName] = useState('');
     const [maxVideoWidth, setMaxVideoWidth] = useState(100);
-    const [selectedBackground, setSelectedBackground] = useState('none');
     const backgroundImageRef = useRef(null);
 
     const handleJoin = () => {
