@@ -13,131 +13,27 @@ import { useIsMobile } from "../utils/isMobile";
 const SOCKET_SERVER = process.env.REACT_APP_SOCKET_SERVER || "https://webrtc-app-04ea.onrender.com";
 
 const Room = () => {
-    const [peers, setPeers] = useState([]);
-    const [filteredPeers, setFilteredPeers] = useState([]);
-    const { myName } = useUser();
-    const [userName, setUserName] = useState("");
-    const [isMuted, setIsMuted] = useState(false);
-    const [isVideoEnabled, setIsVideoEnabled] = useState(true);
-    const [showChat, setShowChat] = useState(false)
-    const [messages, setMessages] = useState([]);
-    const [messageUnread, setMessageUnread] = useState(0);
-    // const [maxVideoWidth, setMaxVideoWidth] = useState(300);
-    const [userVideoHeight, setUserVideoHeight] = useState(100);
-
-    const [maxVideoHeight, setMaxVideoHeight] = useState(200);
-    const [isCopied, setIsCopied] = useState(false);
-    const [reactions, setReactions] = useState([]);
-    const [isScreenSharing, setIsScreenSharing] = useState(false);
+    const { myName, isMuted, setIsMuted, isVideoEnabled, setIsVideoEnabled } = useUser();
+    const {isMobile} = useIsMobile();
+    const { roomID } = useParams();
+    const navigate = useNavigate();
 
     const socketRef = useRef();
     const userVideo = useRef();
     const peersRef = useRef([]);
     const containerRef = useRef();
     const containeкResizeRef = useRef();
-    const { roomID } = useParams();
-    const navigate = useNavigate();
-    const {isMobile} = useIsMobile();
 
-    useEffect(() => {
-        const symbol = Math.random().toString(36).substring(2, 3)
-        const name = myName ? myName : window.outerWidth >= 1920 ? 'Desktop-' + symbol : window.outerWidth >= 1512 ? 'Laptop-' + symbol : 'Mobile-' + symbol;
-        setUserName(name);
-
-        socketRef.current = io(SOCKET_SERVER, {
-            transports: ['websocket', 'polling'],
-            upgrade: true,
-            reconnection: true,
-            reconnectionAttempts: 5,
-            reconnectionDelay: 1000,
-            timeout: 10000,
-            withCredentials: true
-        });
-
-        socketRef.current.on("connect", () => {
-            console.log("Connected to socket server with ID:", socketRef.current.id);
-            
-            navigator.mediaDevices.getUserMedia({ video: true, audio: false })
-                .then(stream => {
-                    userVideo.current.srcObject = stream;
-                    socketRef.current.emit("join room", { roomID, userName: name });
-
-                    setupSocketHandlers(
-                        socketRef,
-                        userVideo,
-                        stream,
-                        name,
-                        roomID,
-                        setPeers,
-                        peersRef,
-                        setMessages,
-                        showChat,
-                        setMessageUnread,
-                        navigate,
-                        setReactions
-                    );
-
-                    return () => {
-                        socketRef.current.off('receiveMessage');
-                        socketRef.current.off('user left');
-                    };
-                })
-                .catch(err => {
-                    console.error("Error accessing media devices:", err);
-                    alert("Unable to access camera/microphone");
-                });
-        });
-
-        socketRef.current.on("connect_error", (error) => {
-            console.error("Socket connection error:", error);
-            alert("Failed to connect to server. Please try again.");
-        });
-
-        socketRef.current.on("disconnect", () => {
-            console.log("Disconnected from server");
-        });
-
-        const handleBeforeUnload = () => {
-            const messageData = {
-                message: 'user-left',
-                userName : name, 
-            };
-            socketRef.current.emit('sendMessage', messageData);
-            socketRef.current.emit('user left', socketRef.current.id);
-        };
-
-        window.addEventListener('beforeunload', handleBeforeUnload);
-
-        return () => {
-            window.removeEventListener('beforeunload', handleBeforeUnload());
-            if (socketRef.current) {
-                socketRef.current.disconnect();
-            }
-            if (userVideo.current?.srcObject) {
-                userVideo.current.srcObject.getTracks().forEach(track => track.stop());
-            }
-            peersRef.current.forEach(({ peer }) => {
-                if (peer) {
-                    peer.destroy();
-                }
-            });
-        };
-    }, [roomID]);
-
-    useEffect(() => {
-        if (isScreenSharing) {
-            (async () => {
-                const stream = await navigator.mediaDevices.getDisplayMedia({ video: true });
-                userVideo.current.srcObject = stream;
-                replaceVideoTrack(stream);
-            })();
-        } else {
-            (async () => {
-                const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
-                userVideo.current.srcObject = stream;
-            })();
-        }
-    }, [isScreenSharing]);
+    const [peers, setPeers] = useState([]);
+    const [filteredPeers, setFilteredPeers] = useState([]);
+    const [showChat, setShowChat] = useState(false)
+    const [messages, setMessages] = useState([]);
+    const [messageUnread, setMessageUnread] = useState(0);
+    const [userVideoHeight, setUserVideoHeight] = useState(100);
+    const [maxVideoHeight, setMaxVideoHeight] = useState(200);
+    const [isCopied, setIsCopied] = useState(false);
+    const [reactions, setReactions] = useState([]);
+    const [isScreenSharing, setIsScreenSharing] = useState(false);
 
     const sendMessage = (data) => {
         if (data.message || data.file) {
@@ -150,7 +46,7 @@ const Room = () => {
         const messageData = {
             ...data,
             message: 'reaction-settings',
-            userName, 
+            userName: myName, 
             id: messageId
         };
         socketRef.current.emit('sendMessage', messageData);
@@ -162,13 +58,14 @@ const Room = () => {
             if (sender) sender.replaceTrack(newTrack);
         });
     };
+
     const toggleMute = () => {
         if (userVideo.current.srcObject) {
             const audioTrack = userVideo.current.srcObject.getAudioTracks()[0];
             audioTrack.enabled = !audioTrack.enabled;
             const messageData = {
 				message: 'sound-settings',
-				userName, 
+				userName: myName, 
                 sound:audioTrack.enabled
 			};
 			socketRef.current.emit('sendMessage', messageData);
@@ -231,7 +128,7 @@ const Room = () => {
             videoTrack.enabled = !videoTrack.enabled;
             const messageData = {
 				message: 'video-settings',
-				userName, 
+				userName: myName,  
                 video:videoTrack.enabled
 			};
 			socketRef.current.emit('sendMessage', messageData);
@@ -242,7 +139,7 @@ const Room = () => {
     const leaveRoom = () => {
         const messageData = {
             message: 'user-left',
-            userName, 
+            userName: myName, 
         };
         socketRef.current.emit('sendMessage', messageData);
         
@@ -278,14 +175,107 @@ const Room = () => {
         }, 2000);
     }
 
+    useEffect(() => {
+        socketRef.current = io(SOCKET_SERVER, {
+            transports: ['websocket', 'polling'],
+            upgrade: true,
+            reconnection: true,
+            reconnectionAttempts: 5,
+            reconnectionDelay: 1000,
+            timeout: 10000,
+            withCredentials: true
+        });
+
+        socketRef.current.on("connect", () => {
+            console.log("Connected to socket server with ID:", socketRef.current.id);
+            
+            navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+                .then(stream => {
+                    userVideo.current.srcObject = stream;
+                    socketRef.current.emit("join room", { roomID, userName: myName });
+
+                    setupSocketHandlers(
+                        socketRef,
+                        userVideo,
+                        stream,
+                        myName,
+                        roomID,
+                        setPeers,
+                        peersRef,
+                        setMessages,
+                        showChat,
+                        setMessageUnread,
+                        navigate,
+                        setReactions
+                    );
+
+                    return () => {
+                        socketRef.current.off('receiveMessage');
+                        socketRef.current.off('user left');
+                    };
+                })
+                .catch(err => {
+                    console.error("Error accessing media devices:", err);
+                    alert("Unable to access camera/microphone");
+                });
+        });
+
+        socketRef.current.on("connect_error", (error) => {
+            console.error("Socket connection error:", error);
+            alert("Failed to connect to server. Please try again.");
+        });
+
+        socketRef.current.on("disconnect", () => {
+            console.log("Disconnected from server");
+        });
+
+        const handleBeforeUnload = () => {
+            const messageData = {
+                message: 'user-left',
+                userName : myName, 
+            };
+            socketRef.current.emit('sendMessage', messageData);
+            socketRef.current.emit('user left', socketRef.current.id);
+        };
+
+        window.addEventListener('beforeunload', handleBeforeUnload);
+
+        return () => {
+            window.removeEventListener('beforeunload', handleBeforeUnload());
+            if (socketRef.current) {
+                socketRef.current.disconnect();
+            }
+            if (userVideo.current?.srcObject) {
+                userVideo.current.srcObject.getTracks().forEach(track => track.stop());
+            }
+            peersRef.current.forEach(({ peer }) => {
+                if (peer) {
+                    peer.destroy();
+                }
+            });
+        };
+    }, [roomID]);
+
+    useEffect(() => {
+        if (isScreenSharing) {
+            (async () => {
+                const stream = await navigator.mediaDevices.getDisplayMedia({ video: true });
+                userVideo.current.srcObject = stream;
+                replaceVideoTrack(stream);
+            })();
+        } else {
+            (async () => {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+                userVideo.current.srcObject = stream;
+            })();
+        }
+    }, [isScreenSharing]);
+
     useEffect(()=>{
         if (containerRef?.current) {
             const filterPeers = peers.filter(peer => peer.peer.readable);
             setFilteredPeers(filterPeers);
-            // const maxVideoWidth = (containerRef.current.clientWidth - (showChat ? ( window.innerWidth > 768 ? 332 : 232 ): 32 ))/filteredPeers.length - (16 * (filteredPeers.length -1));
-            const maxVideoHeight = ((containerRef.current.clientHeight - 176) / filterPeers.length) - 5;
-            // console.log(maxVideoWidth);
-            // setMaxVideoWidth(filteredPeers.length ? maxVideoWidth : containerRef.current.clientWidth);            
+            const maxVideoHeight = ((containerRef.current.clientHeight - 176) / filterPeers.length) - 5;        
             setMaxVideoHeight(isMobile ? maxVideoHeight : containerRef.current.clientHeight - 66);
         }
     },[peers, showChat, containerRef?.current, userVideoHeight])
@@ -321,7 +311,7 @@ const Room = () => {
                             {isCopied ? 'Copied' : 'Copy room URL'}
                         </button>
                         <p className="text-white">
-                            {userName}
+                            {myName}
                         </p>
                     </div>
                 }
@@ -339,12 +329,11 @@ const Room = () => {
                             userName={peerObj.userName || `Participant ${index + 1}`}
                             isMuted={peerObj.isMuted}
                             videoOff={peerObj.videoOff}
-                            // maxVideoWidth={maxVideoWidth}
                             maxVideoHeight={maxVideoHeight}
                         />
                     ))}
                 </div>
-                <Chat name={userName} messages={messages} sendMessage={sendMessage} showChat={showChat} />
+                <Chat name={myName} messages={messages} sendMessage={sendMessage} showChat={showChat} />
             </div>
             <CallBar 
                 toggleMute={toggleMute} 
