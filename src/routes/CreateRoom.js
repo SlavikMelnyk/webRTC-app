@@ -9,7 +9,7 @@ const CreateRoom = () => {
 
     const createNewRoom = () => {
         const id = uuid();
-        navigate(`/room/${id}`);
+        navigate(`/lobby/${id}`);
     }
 
     const calllOneToOne = () => {

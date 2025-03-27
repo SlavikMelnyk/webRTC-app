@@ -13,7 +13,7 @@ import { useIsMobile } from "../utils/isMobile";
 const SOCKET_SERVER = process.env.REACT_APP_SOCKET_SERVER || "https://webrtc-app-04ea.onrender.com";
 
 const Room = () => {
-    const { myName, isMuted, setIsMuted, isVideoEnabled, setIsVideoEnabled } = useUser();
+    const { myName, isMuted, setIsMuted, isVideoEnabled, setIsVideoEnabled, isBlurred } = useUser();
     const {isMobile} = useIsMobile();
     const { roomID } = useParams();
     const navigate = useNavigate();
@@ -197,7 +197,7 @@ const Room = () => {
                     videoTrack.enabled = isVideoEnabled;
 
                     userVideo.current.srcObject = stream;
-                    socketRef.current.emit("join room", { roomID, userName: myName });
+                    socketRef.current.emit("join room", { roomID, userName: myName, isMuted, isVideoEnabled, isBlurred });
 
                     setupSocketHandlers(
                         socketRef,

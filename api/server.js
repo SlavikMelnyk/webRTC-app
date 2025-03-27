@@ -81,7 +81,7 @@ io.on("connection", (socket) => {
 			io.to(message.to).emit("receiveMessage", message);
 		}
 	});
-	socket.on("join room", ({ roomID, userName }) => {
+	socket.on("join room", ({ roomID, userName, isMuted, isVideoEnabled, isBlurred }) => {
         console.log(`User ${socket.id} (${userName}) joining room: ${roomID}`);
         
         socket.join(roomID);
@@ -106,7 +106,7 @@ io.on("connection", (socket) => {
         socket.to(roomID).emit("user joined", { 
             signal: socket.id, 
             callerID: socket.id,
-            userName 
+            userName, isMuted, isVideoEnabled, isBlurred
         });
     });
 

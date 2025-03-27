@@ -42,7 +42,10 @@ export const setupSocketHandlers = (
         peersRef.current.push({
             peerID: payload.callerID,
             peer,
-            userName: payload.userName
+            userName: payload.userName,
+            isMuted: payload.isMuted,
+            isVideoEnabled: payload.isVideoEnabled,
+            isBlurred: payload.isBlurred
         });
         setPeers(users => [...users, { peer, userName: payload.userName }]);
         setMessages((prevMessages) => {
