@@ -176,6 +176,9 @@ const Room = () => {
     }
 
     useEffect(() => {
+        if (!myName) {
+            navigate(`/lobby/${roomID}`);
+        }
         socketRef.current = io(SOCKET_SERVER, {
             transports: ['websocket', 'polling'],
             upgrade: true,
@@ -330,15 +333,13 @@ const Room = () => {
                         gridTemplateColumns: `repeat(${filteredPeers.length}, 1fr)`
                     } : {}}
                 >
-                    {peers.map((peerObj, index) =>{ 
-                        console.log(peerObj, {myName, isMuted, videoOff: !isVideoEnabled, isBlurred});
-                    return (
+                    {peers.map((peerObj, index) =>(
                         <Video 
                             key={index} 
                             peerObj={peerObj}
                             maxVideoHeight={maxVideoHeight}
                         />
-                    )})}
+                    ))}
                 </div>
                 <Chat name={myName} messages={messages} sendMessage={sendMessage} showChat={showChat} />
             </div>

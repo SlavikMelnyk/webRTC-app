@@ -30,16 +30,16 @@ export const setupSocketHandlers = (
                 peerID: user.id,
                 peer,
                 userName: user.userName,
-                isMuted, 
-                isVideoEnabled, 
-                isBlurred
+                isMuted: user.isMuted,
+                videoOff: !user.isVideoEnabled,
+                isBlurred: user.isBlurred
             });
             peers.push({
                 peer,
-                userName: user.userName, 
-                isMuted, 
-                isVideoEnabled, 
-                isBlurred
+                userName: user.userName,
+                isMuted: user.isMuted,
+                videoOff: !user.isVideoEnabled,
+                isBlurred: user.isBlurred
             });
         });
         setPeers(peers);
@@ -57,12 +57,12 @@ export const setupSocketHandlers = (
             isBlurred: payload.isBlurred
         });
         setPeers(users => [...users, { 
-                peer, 
-                userName: payload.userName, 
-                isMuted: payload.isMuted,
-                videoOff: !payload.isVideoEnabled,
-                isBlurred: payload.isBlurred 
-            }]);
+            peer, 
+            userName: payload.userName, 
+            isMuted: payload.isMuted,
+            videoOff: !payload.isVideoEnabled,
+            isBlurred: payload.isBlurred 
+        }]);
         setMessages((prevMessages) => {
             if (prevMessages[prevMessages?.length - 1]?.userName != payload.userName) {
                 return [...prevMessages, {message: 'user-joined', userName: payload.userName}]

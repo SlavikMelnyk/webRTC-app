@@ -17,7 +17,6 @@ const Lobby = () => {
 
     const [name, setName] = useState('');
     const [maxVideoWidth, setMaxVideoWidth] = useState(100);
-    const [loaded, setLoaded] = useState(100);
 
     const handleJoin = () => {
         if (myName === '') {
@@ -125,8 +124,7 @@ const Lobby = () => {
                 />
             </div>
             <div className="flex flex-col items-center justify-center h-full w-full gap-4">
-                <h1 className="text-xl font-semibold">Please configure your stream before join to the room</h1>
-                <h3>Your room ID: {roomID}</h3>
+                <h1 className="text-xl text-center font-semibold">Please configure your stream before join to the room</h1>
                 <input
                     type="text"
                     value={myName}

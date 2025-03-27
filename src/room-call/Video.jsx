@@ -15,7 +15,7 @@ const Video = ({
         peer.on("stream", stream => {
             ref.current.srcObject = stream;
 
-            if (isBlurred) {
+            if (isBlurred && !videoOff) {
                 const videoElement = ref.current;
                 const canvasElement = canvasRef.current;
                 const canvasCtx = canvasElement.getContext('2d');
@@ -59,7 +59,7 @@ const Video = ({
                 };
             }
         })
-    }, [isBlurred]);
+    }, [isBlurred, videoOff]);
     if (peer.readable === false) {
         return null;
     }
@@ -75,19 +75,21 @@ const Video = ({
                     </div>
                 )}
                 <video 
-                    className="rounded-lg cover shadow-lg" 
+                    className="rounded-lg cover shadow-lg w-full h-full" 
                     playsInline 
                     autoPlay 
                     ref={ref}
                     style={{
                         maxHeight: maxVideoHeight,
+                        width: 'auto',
                     }}
                 /> 
                 <canvas
                     ref={canvasRef}
-                    className={`rounded-lg cover shadow-lg absolute top-0 left-0 w-full h-full transition-opacity duration-300 ${isBlurred ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
+                    className={`rounded-lg cover shadow-lg absolute w-full h-full transition-opacity duration-300 ${isBlurred ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
                     style={{
                         maxHeight: maxVideoHeight,
+                        width: 'auto',
                     }}
                 />
                 {(!videoOff || isMuted)  && (
