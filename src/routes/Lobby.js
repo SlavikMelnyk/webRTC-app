@@ -117,10 +117,16 @@ const Lobby = () => {
                     muted
                     playsInline
                     className="rounded-lg shadow-lg object-cover w-full h-auto"
+                    style={{
+                        maxWidth: window.innerWidth * 0.5,
+                    }}
                 />
                 <canvas
                     ref={canvasRef}
-                    className={`rounded-lg shadow-lg object-cover w-full h-auto absolute top-0 left-0 transition-opacity duration-300 ${isBlurred ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
+                    className={`rounded-lg shadow-lg object-cover w-full h-auto absolute transition-opacity duration-300 ${isBlurred ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
+                    style={{
+                        maxWidth: window.innerWidth * 0.5,
+                    }}
                 />
             </div>
             <div className="flex flex-col items-center justify-center h-full w-full gap-4">
