@@ -95,7 +95,7 @@ io.on("connection", (socket) => {
             return;
         }
 
-        users[roomID].push({ id: socket.id, userName });
+        users[roomID].push({ id: socket.id, userName, isMuted, isVideoEnabled, isBlurred });
         socketToRoom[socket.id] = roomID;
 		const usersInThisRoom = users[roomID].filter(user => user.id !== socket.id);
         

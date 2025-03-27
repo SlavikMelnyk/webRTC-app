@@ -29,11 +29,17 @@ export const setupSocketHandlers = (
             peersRef.current.push({
                 peerID: user.id,
                 peer,
-                userName: user.userName
+                userName: user.userName,
+                isMuted, 
+                isVideoEnabled, 
+                isBlurred
             });
             peers.push({
                 peer,
-                userName: user.userName
+                userName: user.userName, 
+                isMuted, 
+                isVideoEnabled, 
+                isBlurred
             });
         });
         setPeers(peers);
@@ -47,14 +53,14 @@ export const setupSocketHandlers = (
             peer,
             userName: payload.userName,
             isMuted: payload.isMuted,
-            isVideoEnabled: payload.isVideoEnabled,
+            videoOff: !payload.isVideoEnabled,
             isBlurred: payload.isBlurred
         });
         setPeers(users => [...users, { 
                 peer, 
                 userName: payload.userName, 
                 isMuted: payload.isMuted,
-                isVideoEnabled: payload.isVideoEnabled,
+                videoOff: !payload.isVideoEnabled,
                 isBlurred: payload.isBlurred 
             }]);
         setMessages((prevMessages) => {

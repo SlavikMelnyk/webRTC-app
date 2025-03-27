@@ -330,16 +330,15 @@ const Room = () => {
                         gridTemplateColumns: `repeat(${filteredPeers.length}, 1fr)`
                     } : {}}
                 >
-                    {peers.map((peerObj, index) => (
+                    {peers.map((peerObj, index) =>{ 
+                        console.log(peerObj, {myName, isMuted, videoOff: !isVideoEnabled, isBlurred});
+                    return (
                         <Video 
                             key={index} 
-                            peer={peerObj.peer}
-                            userName={peerObj.userName || `Participant ${index + 1}`}
-                            isMuted={peerObj.isMuted}
-                            videoOff={peerObj.videoOff}
+                            peerObj={peerObj}
                             maxVideoHeight={maxVideoHeight}
                         />
-                    ))}
+                    )})}
                 </div>
                 <Chat name={myName} messages={messages} sendMessage={sendMessage} showChat={showChat} />
             </div>
