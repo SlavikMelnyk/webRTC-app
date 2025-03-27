@@ -3,14 +3,21 @@ import { FaRegUser } from "react-icons/fa";
 import { FaMicrophoneLinesSlash } from "react-icons/fa6";
 import { SelfieSegmentation } from '@mediapipe/selfie_segmentation';
 
+const backgroundOptions = {
+    none: '',
+    nature: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1400&q=80',
+    beach: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1400&q=80',
+};
+
 const Video = ({
     peerObj,
     maxVideoHeight 
 }) => {
-    const { videoOff, isMuted, userName, peer, isBlurred } = peerObj;
+    const { videoOff, isMuted, userName, peer, isBlurred, selectedBackground } = peerObj;
     const ref = useRef();
     const canvasRef = useRef();
-    
+    const backgroundImageRef = useRef(null);
+
     useEffect(() => {
         peer.on("stream", stream => {
             ref.current.srcObject = stream;
@@ -32,8 +39,8 @@ const Video = ({
                     canvasCtx.save();
                     canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
                 
-                    canvasCtx.filter = 'blur(10px)';
-                    canvasCtx.drawImage(results.image, 0, 0, canvasElement.width, canvasElement.height);
+                    canvasCtx.filter = selectedBackground === 'none' ? 'blur(10px)' : 'none';
+                    canvasCtx.drawImage(selectedBackground !== 'none' ? backgroundImageRef.current :results.image, 0, 0, canvasElement.width, canvasElement.height);
                     
                     canvasCtx.globalCompositeOperation = 'destination-out';
                     canvasCtx.filter = 'none';
@@ -60,6 +67,26 @@ const Video = ({
             }
         })
     }, [isBlurred, videoOff]);
+
+    useEffect(() => {
+        if (selectedBackground !== 'none') {
+            const img = new Image();
+            img.crossOrigin = 'anonymous';
+            img.src = backgroundOptions[selectedBackground];
+
+            img.onload = () => {
+                backgroundImageRef.current = img;
+            };
+
+            img.onerror = () => {
+                console.error('Failed to load background image:', img.src);
+                backgroundImageRef.current = null;
+            };
+        } else {
+            backgroundImageRef.current = null;
+        }
+    }, [selectedBackground]);
+
     if (peer.readable === false) {
         return null;
     }
