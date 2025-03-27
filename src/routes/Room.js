@@ -211,7 +211,10 @@ const Room = () => {
                         showChat,
                         setMessageUnread,
                         navigate,
-                        setReactions
+                        setReactions,
+                        isMuted, 
+                        isVideoEnabled, 
+                        isBlurred
                     );
 
                     return () => {

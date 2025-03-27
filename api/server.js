@@ -106,7 +106,10 @@ io.on("connection", (socket) => {
         socket.to(roomID).emit("user joined", { 
             signal: socket.id, 
             callerID: socket.id,
-            userName, isMuted, isVideoEnabled, isBlurred
+            userName, 
+            isMuted, 
+            isVideoEnabled, 
+            isBlurred
         });
     });
 
@@ -114,7 +117,10 @@ io.on("connection", (socket) => {
         socket.to(payload.userToSignal).emit("user joined", {
             signal: payload.signal,
             callerID: payload.callerID,
-            userName: payload.userName
+            userName: payload.userName,
+            isMuted: payload.isMuted,
+            isVideoEnabled: payload.isVideoEnabled,
+            isBlurred: payload.isBlurred
         });
     });
 

@@ -13,6 +13,9 @@ export const setupSocketHandlers = (
     setMessageUnread,
     navigate,
     setReactions,
+    isMuted, 
+    isVideoEnabled, 
+    isBlurred
 ) => {
     socketRef.current.on("all users with history", data => {
         const { users, history } = data;
@@ -22,7 +25,7 @@ export const setupSocketHandlers = (
         console.log("All users in room:", users);
         const peers = [];
         users.forEach(user => {
-            const peer = createPeer(socketRef, user.id, socketRef.current.id, stream, userName);
+            const peer = createPeer(socketRef, user.id, socketRef.current.id, stream, userName, isMuted, isVideoEnabled, isBlurred);
             peersRef.current.push({
                 peerID: user.id,
                 peer,
@@ -47,7 +50,13 @@ export const setupSocketHandlers = (
             isVideoEnabled: payload.isVideoEnabled,
             isBlurred: payload.isBlurred
         });
-        setPeers(users => [...users, { peer, userName: payload.userName }]);
+        setPeers(users => [...users, { 
+                peer, 
+                userName: payload.userName, 
+                isMuted: payload.isMuted,
+                isVideoEnabled: payload.isVideoEnabled,
+                isBlurred: payload.isBlurred 
+            }]);
         setMessages((prevMessages) => {
             if (prevMessages[prevMessages?.length - 1]?.userName != payload.userName) {
                 return [...prevMessages, {message: 'user-joined', userName: payload.userName}]
@@ -113,7 +122,7 @@ export const setupSocketHandlers = (
     });
 };
 
-function createPeer(socketRef, userToSignal, callerID, stream, userName) {
+function createPeer(socketRef, userToSignal, callerID, stream, userName, isMuted, isVideoEnabled, isBlurred) {
     const peer = new Peer({
         initiator: true,
         trickle: false,
@@ -131,7 +140,10 @@ function createPeer(socketRef, userToSignal, callerID, stream, userName) {
             userToSignal,
             callerID,
             signal,
-            userName
+            userName,
+            isMuted,
+            isVideoEnabled,
+            isBlurred
         });
     });
 
