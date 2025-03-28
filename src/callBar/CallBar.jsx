@@ -6,7 +6,7 @@ import { MdDesktopAccessDisabled } from "react-icons/md";
 import { PiChatCircleLight, PiChatCircleSlash } from "react-icons/pi";
 import { CiFaceSmile } from "react-icons/ci";
 import CallBarItem from "./CallBarItem";
-import { emojiReactions } from "./emojiReactions";
+import { emojiReactions } from "../common/emojiReactions";
 import { useIsMobile } from "../utils/isMobile";
 import { useUser } from "../context/UserContext";
 

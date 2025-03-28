@@ -4,7 +4,7 @@ const UserContext = createContext();
 
 export const UserProvider = ({ children }) => {
     const [myName, setMyName] = useState('');
-    const [isMuted, setIsMuted] = useState(false);
+    const [isMuted, setIsMuted] = useState(true);
     const [isVideoEnabled, setIsVideoEnabled] = useState(true);
     const [isBlurred, setIsBlurred] = useState(true);
     const [selectedBackground, setSelectedBackground] = useState('none');
