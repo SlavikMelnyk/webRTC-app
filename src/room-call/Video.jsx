@@ -9,7 +9,7 @@ const Video = ({
     peerObj,
     maxVideoHeight 
 }) => {
-    const { videoOff, isMuted, userName, peer, isBlurred, selectedBackground } = peerObj;
+    const { videoOff, isMuted, userName, peer, isBlurred, selectedBackground, isScreenSharing } = peerObj;
     const ref = useRef();
     const canvasRef = useRef();
     const backgroundImageRef = useRef(null);
@@ -109,7 +109,7 @@ const Video = ({
                 /> 
                 <canvas
                     ref={canvasRef}
-                    className={`rounded-lg cover shadow-lg absolute w-full h-full transition-opacity duration-300 ${isBlurred ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
+                    className={`rounded-lg cover shadow-lg absolute w-full h-full transition-opacity duration-300 ${isBlurred && !isScreenSharing ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
                     style={{
                         maxHeight: maxVideoHeight,
                         width: 'auto',

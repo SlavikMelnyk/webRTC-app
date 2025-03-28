@@ -1,4 +1,5 @@
 import Peer from "simple-peer";
+import { excludedMessages } from "../common/excludedMessage";
 
 export const setupSocketHandlers = (
     socketRef,
@@ -20,7 +21,7 @@ export const setupSocketHandlers = (
 ) => {
     socketRef.current.on("all users with history", data => {
         const { users, history } = data;
-        const filteredHistory = history.filter(msg => msg.message !== 'sound-settings' && msg.message !== 'video-settings' && msg.message !== 'reaction-settings' && msg.message !== 'user-left' && msg.message !== 'user-joined');
+        const filteredHistory = history.filter(msg => !excludedMessages.includes(msg.message));
         console.log("Chat history:", history, filteredHistory, userName);
         setMessages(filteredHistory);
         console.log("All users in room:", users);
@@ -134,6 +135,16 @@ export const setupSocketHandlers = (
                     setReactions(prevReactions => prevReactions.filter(reaction => reaction !== newReaction));
                 }, 3000);
             }
+        } else if (data.message === 'sharing-settings') {
+            setPeers(peers => {
+                const newPeers = [...peers];
+                newPeers.forEach(peer => {
+                    if (peer.userName === data.userName) {
+                        peer.isScreenSharing = data.sharing;
+                    }
+                });
+                return newPeers;
+            })
         } else {
             if (data.message === 'user-left') {                
                 setReactions(prevReactions => prevReactions.filter(reaction => !reaction.includes(data.userName)));

@@ -105,7 +105,13 @@ const Room = () => {
                     const sender = peer._pc.getSenders().find(s => s.track.kind === "video");
                     if (sender) sender.replaceTrack(screenTrack);
                 });
-    
+                
+                const messageData = {
+                    message: 'sharing-settings',
+                    userName: myName,  
+                    sharing:true
+                };
+                socketRef.current.emit('sendMessage', messageData);
                 setIsScreenSharing(true);
             } catch (err) {
                 console.error("Screen sharing error:", err);
@@ -127,7 +133,12 @@ const Room = () => {
                 const sender = peer._pc.getSenders().find(s => s.track?.kind === "video");
                 if (sender) sender.replaceTrack(videoTrack);
             });
-    
+            const messageData = {
+                message: 'sharing-settings',
+                userName: myName,  
+                sharing:false
+            };
+            socketRef.current.emit('sendMessage', messageData);
             setIsScreenSharing(false);
         } catch (err) {
             console.error("Error stopping screen share and switching back to camera:", err);
@@ -136,6 +147,12 @@ const Room = () => {
 
     const toggleVideo = () => {
         if (isScreenSharing) {
+            const messageData = {
+                message: 'sharing-settings',
+                userName: myName,  
+                sharing:false
+            };
+            socketRef.current.emit('sendMessage', messageData);
             setIsScreenSharing(false);
         } else if (userVideo.current.srcObject) {
             const videoTrack = userVideo.current.srcObject.getVideoTracks()[0];

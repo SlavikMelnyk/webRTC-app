@@ -129,15 +129,17 @@ function CallBar(
 					{isScreenSharing ? <MdDesktopAccessDisabled size={30} /> : isVideoEnabled ? <FaVideoSlash size={30} /> : <FaVideo size={30} />}
 				</button>
 			</CallBarItem>
-			<CallBarItem 
-				label={isRecording ? "Stop Recording" : "Start Recording"}
-				onClick={handleToggleRecording}
-				tooltipText='Click to record'
-			>
-				<button onClick={handleToggleRecording}>
-					{isRecording ? <RiRecordCircleFill size={30} /> : <RiRecordCircleLine size={30} />}
-				</button>
-			</CallBarItem>
+			{!isMobile ?( 
+				<CallBarItem 
+					label={isRecording ? "Stop Recording" : "Start Recording"}
+					onClick={handleToggleRecording}
+					tooltipText='Click to record'
+				>
+					<button onClick={handleToggleRecording}>
+						{!isRecording ? <RiRecordCircleFill size={30} /> : <RiRecordCircleLine color="red" size={30} />}
+					</button>
+				</CallBarItem>
+			) : null}
 			<CallBarItem 
 				label='Leave'
 				onClick={leaveCall}
