@@ -1,3 +1,4 @@
+import { log } from "@tensorflow/tfjs";
 import Peer from "simple-peer";
 
 export const setupSocketHandlers = (
@@ -120,11 +121,24 @@ export const setupSocketHandlers = (
             })
         } else if (data.message === 'reaction-settings') {
             const newReaction = `${data.userName} : ${data.reaction}`;
-            setReactions(prevReactions => [...prevReactions, newReaction]);
-            setTimeout(() => {
-                setReactions(prevReactions => prevReactions.filter(reaction => reaction !== newReaction));
-            }, 3000);
+            
+            if (data.reaction.includes('✋')) {
+                setReactions(prevReactions => {
+                    if (data.type === 'lower') {
+                        return prevReactions.filter(reaction => reaction !== newReaction);
+                    }
+                    return [...prevReactions, newReaction];
+                });
+            } else {
+                setReactions(prevReactions => [...prevReactions, newReaction]);
+                setTimeout(() => {
+                    setReactions(prevReactions => prevReactions.filter(reaction => reaction !== newReaction));
+                }, 3000);
+            }
         } else {
+            if (data.message === 'user-left') {                
+                setReactions(prevReactions => prevReactions.filter(reaction => !reaction.includes(data.userName)));
+            }
             if (!showChat && data.userName !== userName) {
                 setMessageUnread(prev => prev + 1);
             }

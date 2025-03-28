@@ -52,6 +52,18 @@ const Room = () => {
         socketRef.current.emit('sendMessage', messageData);
     }
 
+    const handleRaiseHand = (raise) => {
+        const messageId = uuidv4();
+        const messageData = {
+            reaction: '✋',
+            type: raise ? 'raise' : 'lower', 
+            message: 'reaction-settings',
+            userName: myName, 
+            id: messageId
+        };
+        socketRef.current.emit('sendMessage', messageData);
+    }
+
     const replaceVideoTrack = (newTrack) => {
         peersRef.current.forEach(({ peer }) => {
             const sender = peer._pc.getSenders().find(s => s.track.kind === 'video');
@@ -106,7 +118,7 @@ const Room = () => {
             const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
             const videoTrack = stream.getVideoTracks()[0];
     
-            userVideo.current.srcObject.getTracks().forEach(track => track.stop()); // Stop current screen sharing tracks
+            userVideo.current.srcObject.getTracks().forEach(track => track.stop());
             userVideo.current.srcObject = stream;
     
             peersRef.current.forEach(({ peer }) => {
@@ -357,6 +369,7 @@ const Room = () => {
                 reactions={reactions}
                 isScreenSharing={isScreenSharing}
                 toggleScreenShare={toggleScreenShare}
+                raiseHand={handleRaiseHand}
             />
         </div>
     );

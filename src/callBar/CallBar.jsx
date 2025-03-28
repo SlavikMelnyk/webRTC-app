@@ -1,13 +1,14 @@
-import React, { useState } from "react"
+import React, { useEffect, useState } from "react"
 import "../App.css"
 import { FaMicrophoneLines, FaMicrophoneLinesSlash, FaVideoSlash, FaVideo } from "react-icons/fa6";
-import { FaPhoneSlash, FaDesktop } from "react-icons/fa";
+import { FaPhoneSlash, FaDesktop, FaRegHandPaper, FaRegHandRock } from "react-icons/fa";
 import { MdDesktopAccessDisabled } from "react-icons/md";
 import { PiChatCircleLight, PiChatCircleSlash } from "react-icons/pi";
 import { CiFaceSmile } from "react-icons/ci";
 import CallBarItem from "./CallBarItem";
 import { emojiReactions } from "./emojiReactions";
 import { useIsMobile } from "../utils/isMobile";
+import { useUser } from "../context/UserContext";
 
 function CallBar(
 	{
@@ -22,12 +23,16 @@ function CallBar(
 		sendReaction, 
 		reactions,
 		isScreenSharing,
-		toggleScreenShare
+		toggleScreenShare,
+		raiseHand
 	}) {
+	const {myName} = useUser();
 	const [isOpening, setIsOpening] = useState(false);
 	const [openReaction, setOpenReaction] = useState(false);
 	const [openStream, setOpenStream] = useState(false);
 	const [isHiding, setIsHiding] = useState(false);
+	const [isRaisedHand, setIsRaisedHand] = useState(false);
+	const [raisedHand, setRaisedHand] = useState('');
 	const {isMobile} = useIsMobile();
 
 	const handleShowChat = () =>{
@@ -64,6 +69,16 @@ function CallBar(
 			toggleScreenShare()
 		} else toggleVideo()
 	}
+
+	const handleRaiseHand = () => {		
+		raiseHand(!isRaisedHand)
+		setIsRaisedHand(prev => !prev)
+	}
+
+	useEffect(()=>{
+		const raisedHand = reactions.filter(reaction => reaction.includes('✋'));
+		setRaisedHand(raisedHand);
+	},[reactions])
 
 	return (
 		<div className="absolute bottom-0 left-0 w-full bg-white text-center flex justify-around shadow-md">
@@ -140,8 +155,36 @@ function CallBar(
 					<CiFaceSmile size={30}/>
 				</button>
 				{reactions.map((reaction, index) => (
-					<div className="absolute -top-[30px] left-1/2 translate-x-1/2 flex items-center text-lg text-gray-600 animate-fadeInBottom bg-gray-200 px-2 rounded-md" key={index}>{reaction}</div>
+					<div 
+						key={index}
+						className={`absolute w-fit -top-[30px] text-lg flex items-center text-gray-600 bg-gray-200 px-2 rounded-md 
+								${reaction.includes('✋') ? 'opacity-0' : 'animate-fadeInBottom'}`}
+					>
+						{reaction}
+					</div>
 				))}
+			</CallBarItem>
+			<CallBarItem 
+				label={isRaisedHand ? 'Lower hand' : 'Raise hand'}
+				onClick={handleRaiseHand}
+				tooltipText={!raisedHand[0] ? 'Click to raise hand' : raisedHand[0].includes(myName) ? 'Click to lover hand' :  ''}
+			>
+				<button onClick={handleRaiseHand}>
+					{isRaisedHand ? <FaRegHandRock size={30}/> : <FaRegHandPaper size={30}/>}
+				</button>
+				{raisedHand[0] ? (
+					<div className="absolute bottom-[90px] flex flex-col gap-1">
+						{raisedHand.map((hand, index) => (
+							<div 
+								key={index}
+								onClick={() => hand.includes(myName) ?  handleRaiseHand() : null}
+								className={`select-none text-xl flex items-center text-gray-600 bg-gray-200 px-2 rounded-md border-2 border-transparent hover:${hand.includes(myName) ? 'border-red-500 cursor-pointer' : 'cursor-none'}`}
+							>
+								{hand}
+							</div>
+						))}
+					</div>
+				) : null}
 			</CallBarItem>
 			<CallBarItem 
 				label='Chat'
