@@ -4,6 +4,7 @@ import { FaMicrophoneLines, FaMicrophoneLinesSlash, FaVideoSlash, FaVideo } from
 import { FaPhoneSlash, FaDesktop, FaRegHandPaper, FaRegHandRock } from "react-icons/fa";
 import { MdDesktopAccessDisabled } from "react-icons/md";
 import { PiChatCircleLight, PiChatCircleSlash } from "react-icons/pi";
+import { RiRecordCircleFill, RiRecordCircleLine } from "react-icons/ri";
 import { CiFaceSmile } from "react-icons/ci";
 import CallBarItem from "./CallBarItem";
 import { emojiReactions } from "../common/emojiReactions";
@@ -24,7 +25,10 @@ function CallBar(
 		reactions,
 		isScreenSharing,
 		toggleScreenShare,
-		raiseHand
+		raiseHand,
+		isRecording,
+		stopRecording,
+		startRecording
 	}) {
 	const {myName} = useUser();
 	const [isOpening, setIsOpening] = useState(false);
@@ -75,6 +79,12 @@ function CallBar(
 		setIsRaisedHand(prev => !prev)
 	}
 
+	const handleToggleRecording = () => {
+		if (isRecording) {
+			stopRecording()
+		} else startRecording()
+	}
+
 	useEffect(()=>{
 		const raisedHand = reactions.filter(reaction => reaction.includes('✋'));
 		setRaisedHand(raisedHand);
@@ -117,6 +127,15 @@ function CallBar(
 					) : null}
 				<button onClick={handleToggleVideo}>
 					{isScreenSharing ? <MdDesktopAccessDisabled size={30} /> : isVideoEnabled ? <FaVideoSlash size={30} /> : <FaVideo size={30} />}
+				</button>
+			</CallBarItem>
+			<CallBarItem 
+				label={isRecording ? "Stop Recording" : "Start Recording"}
+				onClick={handleToggleRecording}
+				tooltipText='Click to record'
+			>
+				<button onClick={handleToggleRecording}>
+					{isRecording ? <RiRecordCircleFill size={30} /> : <RiRecordCircleLine size={30} />}
 				</button>
 			</CallBarItem>
 			<CallBarItem 

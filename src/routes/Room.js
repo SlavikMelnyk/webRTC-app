@@ -9,14 +9,16 @@ import { v4 as uuidv4 } from 'uuid';
 import { useUser } from "../context/UserContext";
 import { setupSocketHandlers } from "../utils/socketHandlers";
 import { useIsMobile } from "../utils/isMobile";
+import { useScreenRecording } from '../hooks/useScreenRecording';
 
 const SOCKET_SERVER = process.env.REACT_APP_SOCKET_SERVER || "https://webrtc-app-04ea.onrender.com";
 
 const Room = () => {
-    const { myName, isMuted, setIsMuted, isVideoEnabled, setIsVideoEnabled, isBlurred, selectedBackground } = useUser();
-    const {isMobile} = useIsMobile();
-    const { roomID } = useParams();
     const navigate = useNavigate();
+    const { roomID } = useParams();
+    const { myName, isMuted, setIsMuted, isVideoEnabled, setIsVideoEnabled, isBlurred, selectedBackground } = useUser();
+    const { isRecording, startRecording, stopRecording } = useScreenRecording(roomID);
+    const {isMobile} = useIsMobile();
 
     const socketRef = useRef();
     const userVideo = useRef();
@@ -158,6 +160,7 @@ const Room = () => {
         if (userVideo.current?.srcObject) {
             userVideo.current.srcObject.getTracks().forEach(track => track.stop());
         }
+        stopRecording();
         peersRef.current.forEach(({ peer }) => {
             if (peer) {
                 peer.destroy();
@@ -254,6 +257,7 @@ const Room = () => {
         });
 
         const handleBeforeUnload = () => {
+            stopRecording();
             const messageData = {
                 message: 'user-left',
                 userName : myName, 
@@ -370,6 +374,9 @@ const Room = () => {
                 isScreenSharing={isScreenSharing}
                 toggleScreenShare={toggleScreenShare}
                 raiseHand={handleRaiseHand}
+                isRecording={isRecording}
+                stopRecording={stopRecording}
+                startRecording={startRecording}
             />
         </div>
     );
