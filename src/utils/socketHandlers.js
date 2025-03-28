@@ -1,4 +1,3 @@
-import { log } from "@tensorflow/tfjs";
 import Peer from "simple-peer";
 
 export const setupSocketHandlers = (
