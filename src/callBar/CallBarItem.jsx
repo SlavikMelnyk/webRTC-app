@@ -2,7 +2,15 @@ import React, { useState } from "react"
 import "../App.css"
 
 
-function CallBarItem({children, label, textColor, onClick, tooltipText, ...props }) {
+function CallBarItem({
+	children, 
+	label, 
+	textColor, 
+	onClick, 
+	tooltipText, 
+	fromLobby = false,
+	...props 
+}) {
 	const [isHovered, setIsHovered] = useState(false);
 	const [isHidding, setIsHidding] = useState(false);
 	const handleHideTooltip = ()=> {
@@ -21,7 +29,9 @@ function CallBarItem({children, label, textColor, onClick, tooltipText, ...props
 			{...props}
 		>
 			{children}
-			{tooltipText && isHovered ? <div className={`absolute hidden sm:block select-none -top-[20px] bg-gray-200 w-[200px] px-2 sm:w-fit rounded-lg ${isHidding ? 'animate-fadeOutBottom' : 'animate-fadeInTop'}`}>
+			{tooltipText && isHovered ? <div className={`absolute hidden sm:block select-none bg-gray-200 w-[200px] px-2 sm:w-fit rounded-lg text-center 
+				${fromLobby ? 'bottom-[40px]' : '-top-[20px]'}
+				${isHidding ? 'animate-fadeOutBottom' : 'animate-fadeInTop'}`}>
 				{tooltipText}
 			</div> : null}
 			<p className='text-xs sm:text-sm cursor-pointer select-none' onClick={onClick}>

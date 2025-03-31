@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { SelfieSegmentation } from '@mediapipe/selfie_segmentation';
-import { backgroundOptions } from "../common/backgroundOptions";
+import { backgroundOptions } from "../backgroundOptions";
+import { FaRegUser } from "react-icons/fa";
 
 const VideoDisplay = ({
     videoRef,
@@ -11,7 +12,8 @@ const VideoDisplay = ({
     maxWidth,
     className = "",
     style = {},
-    showEffects = true
+    showEffects = true,
+    isVideoEnabled = true
 }) => {
     const backgroundImageRef = useRef(null);
     const selfieSegmentationRef = useRef(null);
@@ -31,7 +33,7 @@ const VideoDisplay = ({
     };
 
     useEffect(() => {
-        if (!isBlurred || !showEffects || hasError) {
+        if (!showEffects || hasError) {
             stopEffects();
             return;
         }
@@ -60,7 +62,7 @@ const VideoDisplay = ({
                 canvasCtx.save();
                 canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
             
-                canvasCtx.filter = selectedBackground === 'none' ? 'blur(10px)' : 'none';
+                canvasCtx.filter = selectedBackground !== 'none' ? 'none' : isBlurred ? 'blur(10px)' : 'none';
                 canvasCtx.drawImage(
                     selectedBackground !== 'none' && backgroundImageRef.current ? 
                     backgroundImageRef.current : 
@@ -167,9 +169,14 @@ const VideoDisplay = ({
 
     return (
         <div className="relative">
+            {!isVideoEnabled && (
+                <div className="absolute z-10 top-0 left-0 flex flex-col justify-center items-center gap-2 text-white text-center w-full h-full">
+                    <FaRegUser className="mx-auto" size={60}/>
+                </div>
+            )}
             <video
                 ref={videoRef}
-                className={`rounded-lg shadow-lg object-cover ${className}`}
+                className={`rounded-lg shadow-lg object-cover ${className} ${isVideoEnabled ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
                 style={{
                     maxHeight,
                     maxWidth,
@@ -181,7 +188,7 @@ const VideoDisplay = ({
             {showEffects && !hasError && (
                 <canvas
                     ref={canvasRef}
-                    className={`rounded-lg shadow-lg absolute top-0 left-0 w-full h-full transition-opacity duration-300 ${isBlurred ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
+                    className={`rounded-lg shadow-lg absolute top-0 left-0 w-full h-full transition-opacity duration-300 ${className}`}
                     style={{
                         maxHeight,
                         maxWidth,

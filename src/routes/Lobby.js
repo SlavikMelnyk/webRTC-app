@@ -5,7 +5,8 @@ import { MdOutlineBlurOff, MdOutlineBlurOn } from "react-icons/md";
 import { useEffect, useRef, useState } from "react";
 import { backgroundOptions } from "../common/backgroundOptions";
 import BackgroundModal from '../components/BackgroundModal';
-import VideoDisplay from '../components/VideoDisplay';
+import VideoDisplay from '../common/video/VideoDisplay';
+import CallBarItem from "../callBar/CallBarItem";
 
 const Lobby = () => {
     const { myName, setMyName, isMuted, setIsMuted, isVideoEnabled, setIsVideoEnabled, isBlurred, setIsBlurred, selectedBackground, setSelectedBackground } = useUser();
@@ -43,6 +44,11 @@ const Lobby = () => {
             setIsVideoEnabled(!isVideoEnabled);
         }
     };
+
+    const toggleBlur = () => {
+        setIsBlurred(prev => !prev);
+        setSelectedBackground('none');
+    }
 
     useEffect(() => {
         const symbol = Math.random().toString(36).substring(2, 3)
@@ -87,6 +93,7 @@ const Lobby = () => {
                     isBlurred={isBlurred}
                     selectedBackground={selectedBackground}
                     maxWidth={window.innerWidth * 0.5}
+                    isVideoEnabled={isVideoEnabled}
                 />
             </div>
             <div className="relative flex items-center justify-center h-full w-full ">
@@ -101,19 +108,39 @@ const Lobby = () => {
                         onChange={(e) => setMyName(e.target.value)}
                         className='p-2 border rounded-md w-[90vw] sm:w-[400px] h-[50px] transition-all'
                     />
-                    <div className='flex gap-2 transition-all'>
-                        <button onClick={toggleMute}>
-                            {isMuted ? <FaMicrophoneLinesSlash size={30} /> : <FaMicrophoneLines size={30} />}
-                        </button>
-                        <button onClick={toggleVideo}>
-                            {!isVideoEnabled ? <FaVideoSlash size={30} /> : <FaVideo size={30} />}
-                        </button>
-                        <button onClick={() => setIsBlurred(!isBlurred)}>
-                            {isBlurred ? <MdOutlineBlurOn size={30} /> : <MdOutlineBlurOff size={30} />}
-                        </button>
-                        {isBlurred && <button onClick={() => setIsModalOpen(true)}>
-                            <FaRegImage size={30} /> 
-                        </button>}
+                    <div className='relative flex gap-2 transition-all'>
+                        <CallBarItem
+                            tooltipText={isMuted ? 'Unmute' : 'Mute'}
+                            fromLobby
+                        >
+                            <button onClick={toggleMute}>
+                                {isMuted ? <FaMicrophoneLinesSlash size={30} /> : <FaMicrophoneLines size={30} />}
+                            </button>
+                        </CallBarItem>
+                        <CallBarItem
+                            tooltipText={isVideoEnabled ? 'Disable Video' : 'Enable Video'}
+                            fromLobby
+                        >
+                            <button onClick={toggleVideo}>
+                                {!isVideoEnabled ? <FaVideoSlash size={30} /> : <FaVideo size={30} />}
+                            </button>
+                        </CallBarItem>
+                        <CallBarItem
+                            tooltipText={isBlurred ? 'Disable Blur' : 'Enable Blur'}
+                            fromLobby
+                        >
+                            <button onClick={toggleBlur}>
+                                {isBlurred ? <MdOutlineBlurOn size={30} /> : <MdOutlineBlurOff size={30} />}
+                            </button>
+                        </CallBarItem>
+                        <CallBarItem
+                            tooltipText={'Select Background'}
+                            fromLobby
+                        >
+                            <button onClick={() => setIsModalOpen(true)}>
+                                <FaRegImage size={30} /> 
+                            </button>
+                        </CallBarItem>
                     </div>
                     <button
                         onClick={handleJoin}

@@ -10,7 +10,7 @@ import { useUser } from "../context/UserContext";
 import { setupSocketHandlers } from "../utils/socketHandlers";
 import { useIsMobile } from "../utils/isMobile";
 import { useScreenRecording } from '../hooks/useScreenRecording';
-import VideoDisplay from '../components/VideoDisplay';
+import VideoDisplay from '../common/video/VideoDisplay';
 
 const SOCKET_SERVER = process.env.REACT_APP_SOCKET_SERVER || "https://webrtc-app-04ea.onrender.com";
 
