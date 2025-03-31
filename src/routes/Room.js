@@ -10,6 +10,7 @@ import { useUser } from "../context/UserContext";
 import { setupSocketHandlers } from "../utils/socketHandlers";
 import { useIsMobile } from "../utils/isMobile";
 import { useScreenRecording } from '../hooks/useScreenRecording';
+import VideoDisplay from '../components/VideoDisplay';
 
 const SOCKET_SERVER = process.env.REACT_APP_SOCKET_SERVER || "https://webrtc-app-04ea.onrender.com";
 
@@ -25,6 +26,7 @@ const Room = () => {
     const peersRef = useRef([]);
     const containerRef = useRef();
     const containeкResizeRef = useRef();
+    const canvasRef = useRef();
 
     const [peers, setPeers] = useState([]);
     const [filteredPeers, setFilteredPeers] = useState([]);
@@ -123,20 +125,26 @@ const Room = () => {
     
     const stopScreenShare = async () => {        
         try {
-            const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+            const oldStream = userVideo.current.srcObject;
+            const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
             const videoTrack = stream.getVideoTracks()[0];
-    
-            userVideo.current.srcObject.getTracks().forEach(track => track.stop());
-            userVideo.current.srcObject = stream;
-    
-            peersRef.current.forEach(({ peer }) => {
-                const sender = peer._pc.getSenders().find(s => s.track?.kind === "video");
-                if (sender) sender.replaceTrack(videoTrack);
+            videoTrack.enabled = isVideoEnabled;
+            
+            const audioTrack = oldStream.getAudioTracks()[0];
+            if (audioTrack) {
+                stream.addTrack(audioTrack);
+            }
+
+            oldStream.getTracks().forEach(track => {
+                if (track.kind === 'video') track.stop();
             });
+            userVideo.current.srcObject = stream;
+            replaceVideoTrack(videoTrack);
+
             const messageData = {
                 message: 'sharing-settings',
                 userName: myName,  
-                sharing:false
+                sharing: false
             };
             socketRef.current.emit('sendMessage', messageData);
             setIsScreenSharing(false);
@@ -150,20 +158,22 @@ const Room = () => {
             const messageData = {
                 message: 'sharing-settings',
                 userName: myName,  
-                sharing:false
+                sharing: false
             };
             socketRef.current.emit('sendMessage', messageData);
             setIsScreenSharing(false);
         } else if (userVideo.current.srcObject) {
             const videoTrack = userVideo.current.srcObject.getVideoTracks()[0];
-            videoTrack.enabled = !videoTrack.enabled;
-            const messageData = {
-				message: 'video-settings',
-				userName: myName,  
-                video:videoTrack.enabled
-			};
-			socketRef.current.emit('sendMessage', messageData);
-            setIsVideoEnabled(!isVideoEnabled);
+            if (videoTrack) {
+                videoTrack.enabled = !videoTrack.enabled;
+                const messageData = {
+                    message: 'video-settings',
+                    userName: myName,  
+                    video: videoTrack.enabled
+                };
+                socketRef.current.emit('sendMessage', messageData);
+                setIsVideoEnabled(!isVideoEnabled);
+            }
         }
     };
 
@@ -305,13 +315,32 @@ const Room = () => {
         if (isScreenSharing) {
             (async () => {
                 const stream = await navigator.mediaDevices.getDisplayMedia({ video: true });
+                const oldStream = userVideo.current.srcObject;
+                const audioTrack = oldStream.getAudioTracks()[0];
+                stream.addTrack(audioTrack);
                 userVideo.current.srcObject = stream;
-                replaceVideoTrack(stream);
+                replaceVideoTrack(stream.getVideoTracks()[0]);
             })();
         } else {
             (async () => {
-                const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
-                userVideo.current.srcObject = stream;
+                try {
+                    const oldStream = userVideo.current.srcObject;
+                    if (!oldStream) return;
+
+                    const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+                    const videoTrack = stream.getVideoTracks()[0];
+                    videoTrack.enabled = isVideoEnabled;
+                    
+                    const audioTrack = oldStream.getAudioTracks()[0];
+                    if (audioTrack) {
+                        stream.addTrack(audioTrack);
+                    }
+
+                    userVideo.current.srcObject = stream;
+                    replaceVideoTrack(videoTrack);
+                } catch (err) {
+                    console.error("Error getting user media:", err);
+                }
             })();
         }
     }, [isScreenSharing]);
@@ -333,13 +362,13 @@ const Room = () => {
         <div className="flex flex-col min-h-screen overflow-hidden">
             <div ref={containeкResizeRef} className="flex justify-center items-center p-2 sm:p-4 bg-gray-800 resize-y overflow-hidden h-[76px] sm:h-[116px] min-h-[76px] sm:min-h-[116px]">
                 <div className={`relative flex items-center justify-center z-10 bg-transparent ${isVideoEnabled ? 'opacity-100' : 'opacity-0'}`}>
-                    <video
-                        muted
-                        ref={userVideo}
-                        autoPlay
-                        playsInline
-                        className='rounded-lg shadow-lg object-cover'
-                        style={{height: userVideoHeight}}
+                    <VideoDisplay
+                        videoRef={userVideo}
+                        canvasRef={canvasRef}
+                        isBlurred={isBlurred}
+                        selectedBackground={selectedBackground}
+                        maxHeight={userVideoHeight}
+                        showEffects={!isScreenSharing}
                     />
                 </div>
                 {roomID && 

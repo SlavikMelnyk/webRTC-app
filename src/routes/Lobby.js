@@ -1,4 +1,3 @@
-import { SelfieSegmentation } from '@mediapipe/selfie_segmentation';
 import { useNavigate, useParams } from "react-router-dom";
 import { useUser } from "../context/UserContext";
 import { FaMicrophoneLines, FaMicrophoneLinesSlash, FaVideoSlash, FaVideo, FaRegImage } from "react-icons/fa6";
@@ -6,6 +5,7 @@ import { MdOutlineBlurOff, MdOutlineBlurOn } from "react-icons/md";
 import { useEffect, useRef, useState } from "react";
 import { backgroundOptions } from "../common/backgroundOptions";
 import BackgroundModal from '../components/BackgroundModal';
+import VideoDisplay from '../components/VideoDisplay';
 
 const Lobby = () => {
     const { myName, setMyName, isMuted, setIsMuted, isVideoEnabled, setIsVideoEnabled, isBlurred, setIsBlurred, selectedBackground, setSelectedBackground } = useUser();
@@ -19,7 +19,6 @@ const Lobby = () => {
 
     const [name, setName] = useState('');
     const [maxVideoWidth, setMaxVideoWidth] = useState(100);
-    const backgroundImageRef = useRef(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
 
     const handleJoin = () => {
@@ -50,80 +49,21 @@ const Lobby = () => {
         setName(window.outerWidth >= 1920 ? 'Desktop-' + symbol : window.outerWidth >= 1512 ? 'Laptop-' + symbol : 'Mobile-' + symbol);
 
         navigator.mediaDevices.getUserMedia({ video: true, audio: true }).then(stream => {
+            const audioTrack = stream.getAudioTracks()[0];
+            const videoTrack = stream.getVideoTracks()[0];
+            audioTrack.enabled = !isMuted;
+            videoTrack.enabled = isVideoEnabled;
+            
             streamRef.current = stream;
             userVideo.current.srcObject = stream;
-            userVideo.current.play();
-
-            const videoElement = userVideo.current;
-            const canvasElement = canvasRef.current;
-            const canvasCtx = canvasElement.getContext('2d');
-
-            const selfieSegmentation = new SelfieSegmentation({
-                locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/selfie_segmentation/${file}`,
-            });
-
-            selfieSegmentation.setOptions({
-                modelSelection: 1, 
-            });
-
-            selfieSegmentation.onResults((results) => {
-                canvasCtx.save();
-                canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
-            
-                if (isBlurred) {
-                    canvasCtx.filter = selectedBackground === 'none' ? 'blur(10px)' : 'none';
-                    canvasCtx.drawImage(selectedBackground !== 'none' ? backgroundImageRef.current :results.image, 0, 0, canvasElement.width, canvasElement.height);
-                    
-                    canvasCtx.globalCompositeOperation = 'destination-out';
-                    canvasCtx.filter = 'none';
-                    canvasCtx.drawImage(results.segmentationMask, 0, 0, canvasElement.width, canvasElement.height);
-                
-                    canvasCtx.globalCompositeOperation = 'destination-over';
-                    canvasCtx.drawImage(results.image, 0, 0, canvasElement.width, canvasElement.height);
-                } else {
-                    canvasCtx.drawImage(results.image, 0, 0, canvasElement.width, canvasElement.height);
-                }
-            
-                canvasCtx.restore();
-            });
-
-            const onFrame = async () => {
-                if (!videoElement.paused && !videoElement.ended) {
-                    await selfieSegmentation.send({ image: videoElement });
-                }
-                requestAnimationFrame(onFrame);
-            };
-
-            videoElement.onloadeddata = () => {
-                canvasElement.width = videoElement.videoWidth;
-                canvasElement.height = videoElement.videoHeight;
-                onFrame();
-            };
         });
 
         return () => {
-            streamRef.current?.getTracks().forEach(track => track.stop());
+            if (streamRef.current) {
+                streamRef.current.getTracks().forEach(track => track.stop());
+            }
         };
-    }, [selectedBackground]);
-
-    useEffect(() => {
-        if (selectedBackground !== 'none') {
-            const img = new Image();
-            img.crossOrigin = 'anonymous';
-            img.src = backgroundOptions[selectedBackground];
-
-            img.onload = () => {
-                backgroundImageRef.current = img;
-            };
-
-            img.onerror = () => {
-                console.error('Failed to load background image:', img.src);
-                backgroundImageRef.current = null;
-            };
-        } else {
-            backgroundImageRef.current = null;
-        }
-    }, [selectedBackground]);
+    }, []);
 
     useEffect(() => {
         if (containerRef.current) {
@@ -141,21 +81,12 @@ const Lobby = () => {
             className="flex flex-col lg:flex-row p-4 lg:p-20 items-center justify-around gap-10 min-h-screen w-full overflow-auto"
         >
             <div className="relative w-full flex items-center justify-center" style={{ maxWidth: maxVideoWidth }}>
-                <video
-                    ref={userVideo}
-                    muted
-                    playsInline
-                    className="rounded-lg shadow-lg object-cover w-full h-auto"
-                    style={{
-                        maxWidth: window.innerWidth * 0.5,
-                    }}
-                />
-                <canvas
-                    ref={canvasRef}
-                    className={`rounded-lg shadow-lg object-cover w-full h-auto absolute transition-opacity duration-300 ${isBlurred ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
-                    style={{
-                        maxWidth: window.innerWidth * 0.5,
-                    }}
+                <VideoDisplay
+                    videoRef={userVideo}
+                    canvasRef={canvasRef}
+                    isBlurred={isBlurred}
+                    selectedBackground={selectedBackground}
+                    maxWidth={window.innerWidth * 0.5}
                 />
             </div>
             <div className="relative flex items-center justify-center h-full w-full ">
@@ -185,8 +116,8 @@ const Lobby = () => {
                         </button>}
                     </div>
                     <button
-                    onClick={handleJoin}
-                    className='bg-lime-500 rounded-md hover:bg-lime-300 text-white hover:text-gray-600 w-[90vw] sm:w-[400px] h-[50px] transition-all'
+                        onClick={handleJoin}
+                        className='bg-lime-500 rounded-md hover:bg-lime-300 text-white hover:text-gray-600 w-[90vw] sm:w-[400px] h-[50px] transition-all'
                     >
                         Join
                     </button>
@@ -199,7 +130,6 @@ const Lobby = () => {
                     onSelect={setSelectedBackground}
                     userVideo={userVideo}
                 />
-
             </div>
         </div>
     );
