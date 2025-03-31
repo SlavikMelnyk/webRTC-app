@@ -4,6 +4,7 @@ export  const excludedMessages = [
     'reaction-settings', // send reaction and raise/lower hand
     'user-left', // user left the call
     'user-joined', // user joined the call
-    'screen-settings' // start/stop screen sharing
+    'screen-settings', // start/stop screen sharing
+    'user-kicked' // user kicked from the call
 ];
 

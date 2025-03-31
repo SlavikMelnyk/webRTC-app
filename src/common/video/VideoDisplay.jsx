@@ -13,7 +13,8 @@ const VideoDisplay = ({
     className = "",
     style = {},
     showEffects = true,
-    isVideoEnabled = true
+    isVideoEnabled = true,
+    hidden = false
 }) => {
     const backgroundImageRef = useRef(null);
     const selfieSegmentationRef = useRef(null);
@@ -168,7 +169,7 @@ const VideoDisplay = ({
     }, [selectedBackground, showEffects]);
 
     return (
-        <div className="relative">
+        <div className={`relative ${hidden ? 'hidden' : ''}`}>
             {!isVideoEnabled && (
                 <div className="absolute z-10 top-0 left-0 flex flex-col justify-center items-center gap-2 text-white text-center w-full h-full">
                     <FaRegUser className="mx-auto" size={60}/>

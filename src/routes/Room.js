@@ -219,7 +219,7 @@ const Room = () => {
 
     useEffect(() => {
         if (!myName) {
-            navigate(`/lobby/${roomID}`);
+            navigate(`/lobby/${roomID}/conference`);
         }
         socketRef.current = io(SOCKET_SERVER, {
             transports: ['websocket', 'polling'],

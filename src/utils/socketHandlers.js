@@ -18,12 +18,12 @@ export const setupSocketHandlers = (
     isVideoEnabled, 
     isBlurred,
     selectedBackground,
-    creatorAudience
+    creatorAudience,
+    leaveRoom
 ) => {
     socketRef.current.on("all users with history", data => {
         const { users, history } = data;
         const filteredHistory = history.filter(msg => !excludedMessages.includes(msg.message));
-        console.log("Chat history:", history, filteredHistory, userName);
         setMessages(filteredHistory);
         console.log("All users in room:", users);
         const peers = [];
@@ -150,6 +150,10 @@ export const setupSocketHandlers = (
                 });
                 return newPeers;
             })
+        } else if (data.message === 'user-kicked') {
+            if (data.userName === userName) {
+                leaveRoom(true);
+            }
         } else {
             if (data.message === 'user-left') {                
                 setReactions(prevReactions => prevReactions.filter(reaction => !reaction.includes(data.userName)));

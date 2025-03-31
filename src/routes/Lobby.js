@@ -154,10 +154,10 @@ const Lobby = () => {
                     >
                         Join
                     </button>
-                    <div className="flex items-center gap-2">
+                    {type === 'audience' && <div className="flex items-center gap-2">
                         <span>Creator Audience: </span>
                         <input type="checkbox" className="w-5 h-5" checked={creatorAudience} onChange={() => setCreatorAudience(prev => !prev)} />
-                    </div>
+                    </div>}
                 </div>
                 <BackgroundModal 
                     isOpen={isModalOpen}

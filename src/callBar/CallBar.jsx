@@ -6,6 +6,7 @@ import { MdDesktopAccessDisabled } from "react-icons/md";
 import { PiChatCircleLight, PiChatCircleSlash } from "react-icons/pi";
 import { RiRecordCircleFill, RiRecordCircleLine } from "react-icons/ri";
 import { CiFaceSmile } from "react-icons/ci";
+import { MdFilterListOff, MdFormatListBulleted } from "react-icons/md";
 import CallBarItem from "./CallBarItem";
 import { emojiReactions } from "../common/emojiReactions";
 import { useIsMobile } from "../utils/isMobile";
@@ -28,9 +29,12 @@ function CallBar(
 		raiseHand,
 		isRecording,
 		stopRecording,
-		startRecording
+		startRecording,
+		showUsersList,
+		handleOpenUsersList,
+		type,
 	}) {
-	const {myName} = useUser();
+	const {myName, creatorAudience} = useUser();
 	const [isOpening, setIsOpening] = useState(false);
 	const [openReaction, setOpenReaction] = useState(false);
 	const [openStream, setOpenStream] = useState(false);
@@ -92,7 +96,16 @@ function CallBar(
 
 	return (
 		<div className="absolute bottom-0 left-0 w-full bg-white text-center flex justify-around shadow-md">
-			<CallBarItem 
+			{type === 'audience' && creatorAudience && <CallBarItem 
+				label={showUsersList? 'Hide Users List' : 'Show Users List'}
+				onClick={handleOpenUsersList}
+				tooltipText={showUsersList ? 'Click to hide users list' : 'Click to show users list'}
+			>
+				<button onClick={handleOpenUsersList}>
+					{showUsersList ? <MdFilterListOff size={30} />  : <MdFormatListBulleted size={30} />}
+				</button>
+			</CallBarItem>}
+			{(type !== 'audience' || creatorAudience) && <CallBarItem 
 				label={isMuted? 'Unmute' : 'Mute'}
 				onClick={toggleMute}
 				tooltipText={isMuted ? 'Click to unmute' : 'Click to mute'}
@@ -100,8 +113,8 @@ function CallBar(
 				<button onClick={toggleMute}>
 					{isMuted ? <FaMicrophoneLinesSlash size={30} />  : <FaMicrophoneLines size={30} />}
 				</button>
-			</CallBarItem>
-			<CallBarItem 
+			</CallBarItem>}
+			{(type !== 'audience' || creatorAudience) && <CallBarItem 
 				label={isScreenSharing ? 'Stop sharing' : isVideoEnabled ? 'Stop camera' : 'Show camera'}
 				onClick={toggleVideo}
 				onMouseEnter={() => setOpenStream(isMobile ? false : true)} 
@@ -128,7 +141,7 @@ function CallBar(
 				<button onClick={handleToggleVideo}>
 					{isScreenSharing ? <MdDesktopAccessDisabled size={30} /> : isVideoEnabled ? <FaVideoSlash size={30} /> : <FaVideo size={30} />}
 				</button>
-			</CallBarItem>
+			</CallBarItem>}
 			{!isMobile ?( 
 				<CallBarItem 
 					label={isRecording ? "Stop Recording" : "Start Recording"}
