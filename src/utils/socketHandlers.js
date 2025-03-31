@@ -17,7 +17,8 @@ export const setupSocketHandlers = (
     isMuted, 
     isVideoEnabled, 
     isBlurred,
-    selectedBackground
+    selectedBackground,
+    creatorAudience
 ) => {
     socketRef.current.on("all users with history", data => {
         const { users, history } = data;
@@ -27,7 +28,7 @@ export const setupSocketHandlers = (
         console.log("All users in room:", users);
         const peers = [];
         users.forEach(user => {
-            const peer = createPeer(socketRef, user.id, socketRef.current.id, stream, userName, isMuted, isVideoEnabled, isBlurred, selectedBackground);
+            const peer = createPeer(socketRef, user.id, socketRef.current.id, stream, userName, isMuted, isVideoEnabled, isBlurred, selectedBackground, creatorAudience);
             peersRef.current.push({
                 peerID: user.id,
                 peer,
@@ -35,7 +36,8 @@ export const setupSocketHandlers = (
                 isMuted: user.isMuted,
                 videoOff: !user.isVideoEnabled,
                 isBlurred: user.isBlurred,
-                selectedBackground: user.selectedBackground
+                selectedBackground: user.selectedBackground,
+                creatorAudience: user.creatorAudience
             });
             peers.push({
                 peer,
@@ -43,7 +45,8 @@ export const setupSocketHandlers = (
                 isMuted: user.isMuted,
                 videoOff: !user.isVideoEnabled,
                 isBlurred: user.isBlurred,
-                selectedBackground: user.selectedBackground
+                selectedBackground: user.selectedBackground,
+                creatorAudience: user.creatorAudience
             });
         });
         setPeers(peers);
@@ -59,7 +62,8 @@ export const setupSocketHandlers = (
             isMuted: payload.isMuted,
             videoOff: !payload.isVideoEnabled,
             isBlurred: payload.isBlurred,
-            selectedBackground: payload.selectedBackground
+            selectedBackground: payload.selectedBackground,
+            creatorAudience: payload.creatorAudience
         });
         setPeers(users => [...users, { 
             peer, 
@@ -67,7 +71,8 @@ export const setupSocketHandlers = (
             isMuted: payload.isMuted,
             videoOff: !payload.isVideoEnabled,
             isBlurred: payload.isBlurred,
-            selectedBackground: payload.selectedBackground
+            selectedBackground: payload.selectedBackground,
+            creatorAudience: payload.creatorAudience
         }]);
         setMessages((prevMessages) => {
             if (prevMessages[prevMessages?.length - 1]?.userName != payload.userName) {
@@ -157,7 +162,7 @@ export const setupSocketHandlers = (
     });
 };
 
-function createPeer(socketRef, userToSignal, callerID, stream, userName, isMuted, isVideoEnabled, isBlurred, selectedBackground) {
+function createPeer(socketRef, userToSignal, callerID, stream, userName, isMuted, isVideoEnabled, isBlurred, selectedBackground, creatorAudience) {
     const peer = new Peer({
         initiator: true,
         trickle: false,
@@ -179,7 +184,8 @@ function createPeer(socketRef, userToSignal, callerID, stream, userName, isMuted
             isMuted,
             isVideoEnabled,
             isBlurred,
-            selectedBackground
+            selectedBackground,
+            creatorAudience
         });
     });
 

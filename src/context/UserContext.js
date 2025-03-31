@@ -8,8 +8,9 @@ export const UserProvider = ({ children }) => {
     const [isVideoEnabled, setIsVideoEnabled] = useState(true);
     const [isBlurred, setIsBlurred] = useState(true);
     const [selectedBackground, setSelectedBackground] = useState('none');
+    const [creatorAudience, setCreatorAudience] = useState(false);
     return (
-        <UserContext.Provider value={{ myName, setMyName, isMuted, setIsMuted, isVideoEnabled, setIsVideoEnabled, isBlurred, setIsBlurred, selectedBackground, setSelectedBackground }}>
+        <UserContext.Provider value={{ myName, setMyName, isMuted, setIsMuted, isVideoEnabled, setIsVideoEnabled, isBlurred, setIsBlurred, selectedBackground, setSelectedBackground, creatorAudience, setCreatorAudience }}>
             {children}
         </UserContext.Provider>
     );

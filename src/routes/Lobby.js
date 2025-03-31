@@ -7,10 +7,11 @@ import { backgroundOptions } from "../common/backgroundOptions";
 import BackgroundModal from '../components/BackgroundModal';
 import VideoDisplay from '../common/video/VideoDisplay';
 import CallBarItem from "../callBar/CallBarItem";
+import { FaChevronLeft } from "react-icons/fa";
 
 const Lobby = () => {
-    const { myName, setMyName, isMuted, setIsMuted, isVideoEnabled, setIsVideoEnabled, isBlurred, setIsBlurred, selectedBackground, setSelectedBackground } = useUser();
-    const { roomID } = useParams();
+    const { myName, setMyName, isMuted, setIsMuted, isVideoEnabled, setIsVideoEnabled, isBlurred, setIsBlurred, selectedBackground, setSelectedBackground, creatorAudience, setCreatorAudience } = useUser();
+    const { roomID, type } = useParams();
     const navigate = useNavigate();
 
     const userVideo = useRef(null);
@@ -26,7 +27,9 @@ const Lobby = () => {
         if (myName === '') {
             setMyName(name);
         }
-        navigate(`/room/${roomID}`)
+        if (type === 'audience') {
+            navigate(`/audience/${roomID}`)
+        } else navigate(`/room/${roomID}`)
     }
 
     const toggleMute = () => {
@@ -84,8 +87,11 @@ const Lobby = () => {
     return (
         <div
             ref={containerRef}
-            className="flex flex-col lg:flex-row p-4 lg:p-20 items-center justify-around gap-10 min-h-screen w-full overflow-auto"
+            className="relative flex flex-col lg:flex-row p-4 lg:p-20 items-center justify-around gap-10 min-h-screen w-full overflow-auto"
         >
+            <button onClick={() => navigate('/')} className="absolute top-4 left-4 hover:text-gray-600 transition-colors animate-fadeRight">
+                <FaChevronLeft size={30} />
+            </button>
             <div className="relative w-full flex items-center justify-center" style={{ maxWidth: maxVideoWidth }}>
                 <VideoDisplay
                     videoRef={userVideo}
@@ -148,6 +154,10 @@ const Lobby = () => {
                     >
                         Join
                     </button>
+                    <div className="flex items-center gap-2">
+                        <span>Creator Audience: </span>
+                        <input type="checkbox" className="w-5 h-5" checked={creatorAudience} onChange={() => setCreatorAudience(prev => !prev)} />
+                    </div>
                 </div>
                 <BackgroundModal 
                     isOpen={isModalOpen}

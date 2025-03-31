@@ -81,7 +81,7 @@ io.on("connection", (socket) => {
 			io.to(message.to).emit("receiveMessage", message);
 		}
 	});
-	socket.on("join room", ({ roomID, userName, isMuted, isVideoEnabled, isBlurred, selectedBackground }) => {
+	socket.on("join room", ({ roomID, userName, isMuted, isVideoEnabled, isBlurred, selectedBackground, creatorAudience }) => {
         console.log(`User ${socket.id} (${userName}) joining room: ${roomID}`);
         
         socket.join(roomID);
@@ -95,7 +95,7 @@ io.on("connection", (socket) => {
             return;
         }
 
-        users[roomID].push({ id: socket.id, userName, isMuted, isVideoEnabled, isBlurred, selectedBackground });
+        users[roomID].push({ id: socket.id, userName, isMuted, isVideoEnabled, isBlurred, selectedBackground, creatorAudience });
         socketToRoom[socket.id] = roomID;
 		const usersInThisRoom = users[roomID].filter(user => user.id !== socket.id);
         
@@ -110,7 +110,8 @@ io.on("connection", (socket) => {
             isMuted, 
             isVideoEnabled, 
             isBlurred, 
-            selectedBackground
+            selectedBackground,
+            creatorAudience
         });
     });
 
@@ -122,7 +123,8 @@ io.on("connection", (socket) => {
             isMuted: payload.isMuted,
             isVideoEnabled: payload.isVideoEnabled,
             isBlurred: payload.isBlurred,
-            selectedBackground: payload.selectedBackground
+            selectedBackground: payload.selectedBackground,
+            creatorAudience: payload.creatorAudience
         });
     });
 
