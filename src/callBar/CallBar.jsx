@@ -33,12 +33,11 @@ function CallBar(
 		type,
 		addPermission
 	}) {
-	const {myName, creatorAudience, isMuted, isVideoEnabled} = useUser();
+	const {myName, creatorAudience, isMuted, isVideoEnabled, isRaisedHand} = useUser();
 	const [isOpening, setIsOpening] = useState(false);
 	const [openReaction, setOpenReaction] = useState(false);
 	const [openStream, setOpenStream] = useState(false);
 	const [isHiding, setIsHiding] = useState(false);
-	const [isRaisedHand, setIsRaisedHand] = useState(false);
 	const [raisedHand, setRaisedHand] = useState('');
 	const {isMobile} = useIsMobile();
 
@@ -88,7 +87,6 @@ function CallBar(
 			
 		} else {
 			raiseHand(!isRaisedHand)
-			setIsRaisedHand(prev => !prev)
 		}
 	}
 
@@ -212,7 +210,7 @@ function CallBar(
 				onClick={handleRaiseHand}
 				tooltipText={!raisedHand[0] ? 'Click to raise hand' : raisedHand[0].includes(myName) ? 'Click to lover hand' :  ''}
 			>
-				<button onClick={handleRaiseHand}>
+				<button onClick={handleRaiseHand} disabled={creatorAudience}>
 					{isRaisedHand ? <FaRegHandRock size={30}/> : <FaRegHandPaper size={30}/>}
 				</button>
 				{raisedHand[0] ? (
@@ -221,7 +219,7 @@ function CallBar(
 							<div 
 								key={index}
 								onClick={() => hand.includes(myName) || creatorAudience ?  handleRaiseHand(hand) : ''}
-								className={`select-none text-xl flex items-center text-gray-600 bg-gray-200 px-2 rounded-md border-2 border-transparent hover:${hand.includes(myName) ? 'border-red-500 cursor-pointer' : 'cursor-none'}`}
+								className={`select-none text-xl flex items-center text-gray-600 bg-gray-200 px-2 rounded-md border-2 border-transparent hover:${hand.includes(myName) ? 'border-red-500 cursor-pointer' : 'cursor-none'} ${creatorAudience ? 'cursor-pointer' : ''}`}
 							>
 								{hand}
 							</div>

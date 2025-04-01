@@ -22,12 +22,12 @@ const Lobby = () => {
     const [name, setName] = useState('');
     const [maxVideoWidth, setMaxVideoWidth] = useState(100);
     const [isModalOpen, setIsModalOpen] = useState(false);
-
+    const isAudience = type === 'audience';
     const handleJoin = () => {
         if (myName === '') {
             setMyName(name);
         }
-        if (type === 'audience') {
+        if (isAudience) {
             navigate(`/audience/${roomID}`)
         } else navigate(`/room/${roomID}`)
     }
@@ -114,7 +114,7 @@ const Lobby = () => {
                         onChange={(e) => setMyName(e.target.value)}
                         className='p-2 border rounded-md w-[90vw] sm:w-[400px] h-[50px] transition-all'
                     />
-                    <div className='relative flex gap-2 transition-all'>
+                    {(!isAudience || creatorAudience) && <div className='relative flex gap-2 transition-all'>
                         <CallBarItem
                             tooltipText={isMuted ? 'Unmute' : 'Mute'}
                             fromLobby
@@ -147,14 +147,14 @@ const Lobby = () => {
                                 <FaRegImage size={30} /> 
                             </button>
                         </CallBarItem>
-                    </div>
+                    </div>}
                     <button
                         onClick={handleJoin}
                         className='bg-lime-500 rounded-md hover:bg-lime-300 text-white hover:text-gray-600 w-[90vw] sm:w-[400px] h-[50px] transition-all'
                     >
                         Join
                     </button>
-                    {type === 'audience' && <div className="flex items-center gap-2">
+                    {isAudience && <div className="flex items-center gap-2">
                         <span>Creator Audience: </span>
                         <input type="checkbox" className="w-5 h-5" checked={creatorAudience} onChange={() => setCreatorAudience(prev => !prev)} />
                     </div>}

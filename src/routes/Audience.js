@@ -4,7 +4,6 @@ import { useParams, useNavigate } from "react-router-dom";
 import CallBar from "../callBar/CallBar";
 import Chat from "../chat/Chat";
 import Video from "../room-call/Video";
-import { TbCopyCheckFilled } from "react-icons/tb";
 import { v4 as uuidv4 } from 'uuid';
 import { useUser } from "../context/UserContext";
 import { setupSocketHandlers } from "../utils/socketHandlers";
@@ -18,7 +17,7 @@ const SOCKET_SERVER = process.env.REACT_APP_SOCKET_SERVER || "https://webrtc-app
 const Audience = () => {
     const navigate = useNavigate();
     const { roomID } = useParams();
-    const { myName, isMuted, setIsMuted, isVideoEnabled, setIsVideoEnabled, isBlurred, selectedBackground, creatorAudience } = useUser();
+    const { myName, isMuted, setIsMuted, isVideoEnabled, setIsVideoEnabled, isBlurred, selectedBackground, creatorAudience, setIsRaisedHand } = useUser();
     const { isRecording, startRecording, stopRecording } = useScreenRecording(roomID);
     const {isMobile} = useIsMobile();
 
@@ -52,6 +51,7 @@ const Audience = () => {
     }
 
     const handleRaiseHand = (raise) => {
+        setIsRaisedHand(raise);
         const messageId = uuidv4();
         const messageData = {
             reaction: '✋',
@@ -71,8 +71,6 @@ const Audience = () => {
     };
 
     const toggleMute = () => {
-        console.log(1);
-        
             const audioTrack = userVideo.current.srcObject.getAudioTracks()[0];
             audioTrack.enabled = !audioTrack.enabled;
             const messageData = {
@@ -178,7 +176,6 @@ const Audience = () => {
             userName  
         };
         socketRef.current.emit('sendMessage', messageData);
-        console.log('add permission: ', userName);
     }
 
     const leaveRoom = (byCreator = false) => {
@@ -236,6 +233,9 @@ const Audience = () => {
         if (!myName) {
             navigate(`/lobby/${roomID}/audience`);
         }
+        if (!creatorAudience) {
+            setIsMuted(true)
+        }
         socketRef.current = io(SOCKET_SERVER, {
             transports: ['websocket', 'polling'],
             upgrade: true,
@@ -253,7 +253,7 @@ const Audience = () => {
                 .then(stream => {
                     const audioTrack = stream.getAudioTracks()[0];
                     const videoTrack = stream.getVideoTracks()[0];
-                    audioTrack.enabled = !isMuted;
+                    audioTrack.enabled = creatorAudience;
                     videoTrack.enabled = creatorAudience;
 
                     userVideo.current.srcObject = stream;
@@ -279,6 +279,7 @@ const Audience = () => {
                         creatorAudience,
                         leaveRoom,
                         toggleMute,
+                        handleRaiseHand,
                     );
 
                     return () => {
@@ -372,12 +373,6 @@ const Audience = () => {
         }
     },[peers, showChat, containerRef?.current, userVideoHeight])
 
-    useEffect(() => {
-        if (!creatorAudience) {
-            setIsMuted(false)
-        }
-    },[creatorAudience])
-
     if (containeкResizeRef?.current) {
         new ResizeObserver(() => setUserVideoHeight(containeкResizeRef.current?.clientHeight * 0.9)).observe(containeкResizeRef.current);
     }
@@ -414,7 +409,7 @@ const Audience = () => {
                         );
                     }) : null}
                 </div>
-                {creatorAudience && <UsersList users={filteredPeers} showList={showUsersList} kickUser={kickUser} />}
+                {creatorAudience && <UsersList users={filteredPeers} showList={showUsersList} kickUser={kickUser} addPermission={addPermission}/>}
                 <Chat socketRef={socketRef} name={myName} messages={messages} showChat={showChat} />
             </div>
             <CallBar 

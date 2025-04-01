@@ -20,7 +20,8 @@ export const setupSocketHandlers = (
     selectedBackground,
     creatorAudience,
     leaveRoom,
-    toggleMute
+    toggleMute,
+    handleRaiseHand
 ) => {
     socketRef.current.on("all users with history", data => {
         const { users, history } = data;
@@ -158,6 +159,7 @@ export const setupSocketHandlers = (
         } else if (data.message === 'add-permission') {
             if (data.userName === userName) {
                 toggleMute();
+                handleRaiseHand(false);
             }
         } else {
             if (data.message === 'user-left') {                
