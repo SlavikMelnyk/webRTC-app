@@ -114,7 +114,7 @@ const Lobby = () => {
                         onChange={(e) => setMyName(e.target.value)}
                         className='p-2 border rounded-md w-[90vw] sm:w-[400px] h-[50px] transition-all'
                     />
-                    {(!isAudience || creatorAudience) && <div className='relative flex gap-2 transition-all'>
+                    {<div className='relative flex gap-2 transition-all'>
                         <CallBarItem
                             tooltipText={isMuted ? 'Unmute' : 'Mute'}
                             fromLobby
