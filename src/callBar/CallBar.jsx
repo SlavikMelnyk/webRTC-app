@@ -69,7 +69,12 @@ function CallBar(
 			setIsHiding(false)
 		}, 300);
 	}
-	
+	const handleOpenStream = ()=> {
+		setOpenStream(isMobile ? false : true)
+		setTimeout(() => {
+			setOpenStream( false)
+		}, 3000);
+	}
 	const handleToggleVideo = () => {
 		if (isScreenSharing) {
 			toggleScreenShare()
@@ -124,13 +129,11 @@ function CallBar(
 			{(type !== 'audience' || creatorAudience) && <CallBarItem 
 				label={isScreenSharing ? 'Stop sharing' : isVideoEnabled ? 'Stop camera' : 'Show camera'}
 				onClick={toggleVideo}
-				onMouseEnter={() => setOpenStream(isMobile ? false : true)} 
+				onMouseEnter={handleOpenStream} 
 				onMouseLeave={handleHideStream}
 				onContextMenu={(e) =>{ 
 					e.preventDefault(); 
-					if (!isMobile) {
-						setOpenStream(true)
-					}
+					handleOpenStream()
 				}}
 			>
 				{openStream && !isScreenSharing ? ( 

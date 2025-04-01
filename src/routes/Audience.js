@@ -11,6 +11,7 @@ import { useIsMobile } from "../utils/isMobile";
 import { useScreenRecording } from '../hooks/useScreenRecording';
 import VideoDisplay from '../common/video/VideoDisplay';
 import UsersList from "../audience/UsersList";
+import { FaMicrophoneLines } from "react-icons/fa6";
 
 const SOCKET_SERVER = process.env.REACT_APP_SOCKET_SERVER || "https://webrtc-app-04ea.onrender.com";
 
@@ -230,11 +231,11 @@ const Audience = () => {
     };
 
     useEffect(() => {
-        if (!myName) {
-            navigate(`/lobby/${roomID}/audience`);
-        }
         if (!creatorAudience) {
             setIsMuted(true)
+        }
+        if (!myName) {
+            navigate(`/lobby/${roomID}/audience`);
         }
         socketRef.current = io(SOCKET_SERVER, {
             transports: ['websocket', 'polling'],
@@ -409,6 +410,7 @@ const Audience = () => {
                         );
                     }) : null}
                 </div>
+                {!creatorAudience && !isMuted && <FaMicrophoneLines className="absolute bottom-[76px] sm:bottom-[80px] left-4" size={40}/>}
                 {creatorAudience && <UsersList users={filteredPeers} showList={showUsersList} kickUser={kickUser} addPermission={addPermission}/>}
                 <Chat socketRef={socketRef} name={myName} messages={messages} showChat={showChat} />
             </div>

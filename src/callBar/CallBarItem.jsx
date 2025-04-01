@@ -21,10 +21,17 @@ function CallBarItem({
 		}, 300);
 	}
 
+	const handleShowTooltip = ()=> {
+		setIsHovered(true)
+		setTimeout(() => {
+			handleHideTooltip()
+		}, 3000);
+	}
+
 	return (
 		<div 
 			className={`relative w-full p-2 flex flex-col items-center text-[${textColor}]`} 
-			onMouseEnter={() => setIsHovered(true)}
+			onMouseEnter={handleShowTooltip}
 			onMouseLeave={handleHideTooltip}
 			{...props}
 		>
