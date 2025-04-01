@@ -23,6 +23,8 @@ const UsersList = ({ users, showList, kickUser }) => {
         return null;
     }
     
+    console.log(users);
+    
     return (
         <div className={`absolute z-10 top-[10px] left-1 sm:left-[10px] bg-white text-center rounded-md w-[200px] sm:w-[300px] h-fit p-2 flex flex-col gap-2 ${isClosing === 'closing' ? 'animate-fadeOutLeft' : 'animate-fadeInLeft'}`} style={{ maxHeight: 'calc(100% - 86px)' }}>
             <div className='flex justify-between items-center text-lg'>

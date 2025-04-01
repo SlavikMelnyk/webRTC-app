@@ -19,7 +19,8 @@ export const setupSocketHandlers = (
     isBlurred,
     selectedBackground,
     creatorAudience,
-    leaveRoom
+    leaveRoom,
+    toggleMute
 ) => {
     socketRef.current.on("all users with history", data => {
         const { users, history } = data;
@@ -153,6 +154,10 @@ export const setupSocketHandlers = (
         } else if (data.message === 'user-kicked') {
             if (data.userName === userName) {
                 leaveRoom(true);
+            }
+        } else if (data.message === 'add-permission') {
+            if (data.userName === userName) {
+                toggleMute();
             }
         } else {
             if (data.message === 'user-left') {                

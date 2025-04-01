@@ -17,8 +17,6 @@ function CallBar(
 		toggleMute, 
 		toggleVideo, 
 		leaveCall, 
-		isMuted, 
-		isVideoEnabled, 
 		showChat, 
 		setShowChat, 
 		messageUnread, 
@@ -33,8 +31,9 @@ function CallBar(
 		showUsersList,
 		handleOpenUsersList,
 		type,
+		addPermission
 	}) {
-	const {myName, creatorAudience} = useUser();
+	const {myName, creatorAudience, isMuted, isVideoEnabled} = useUser();
 	const [isOpening, setIsOpening] = useState(false);
 	const [openReaction, setOpenReaction] = useState(false);
 	const [openStream, setOpenStream] = useState(false);
@@ -78,9 +77,19 @@ function CallBar(
 		} else toggleVideo()
 	}
 
-	const handleRaiseHand = () => {		
-		raiseHand(!isRaisedHand)
-		setIsRaisedHand(prev => !prev)
+	const handleRaiseHand = (hand) => {	
+		if (creatorAudience) {
+			if (typeof hand !== 'string') {
+				return;
+			}
+			const userName = hand.substring(0, hand.indexOf(' '));
+
+			addPermission(userName);
+			
+		} else {
+			raiseHand(!isRaisedHand)
+			setIsRaisedHand(prev => !prev)
+		}
 	}
 
 	const handleToggleRecording = () => {
@@ -211,7 +220,7 @@ function CallBar(
 						{raisedHand.map((hand, index) => (
 							<div 
 								key={index}
-								onClick={() => hand.includes(myName) ?  handleRaiseHand() : null}
+								onClick={() => hand.includes(myName) || creatorAudience ?  handleRaiseHand(hand) : ''}
 								className={`select-none text-xl flex items-center text-gray-600 bg-gray-200 px-2 rounded-md border-2 border-transparent hover:${hand.includes(myName) ? 'border-red-500 cursor-pointer' : 'cursor-none'}`}
 							>
 								{hand}

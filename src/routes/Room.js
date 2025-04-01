@@ -39,12 +39,6 @@ const Room = () => {
     const [reactions, setReactions] = useState([]);
     const [isScreenSharing, setIsScreenSharing] = useState(false);
 
-    const sendMessage = (data) => {
-        if (data.message || data.file) {
-            socketRef.current.emit('sendMessage', data);
-        }
-    };
-
     const handleSendReaction = (data) => {
         const messageId = uuidv4();
         const messageData = {
@@ -404,13 +398,11 @@ const Room = () => {
                         />
                     ))}
                 </div>
-                <Chat name={myName} messages={messages} sendMessage={sendMessage} showChat={showChat} />
+                <Chat socketRef={socketRef} name={myName} messages={messages} showChat={showChat} />
             </div>
             <CallBar 
                 toggleMute={toggleMute} 
-                isMuted={isMuted} 
                 toggleVideo={toggleVideo} 
-                isVideoEnabled={isVideoEnabled} 
                 leaveCall={leaveRoom} 
                 showChat={showChat} 
                 setShowChat={handleOpenChat} 

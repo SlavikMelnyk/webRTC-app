@@ -2,13 +2,19 @@ import React, { useEffect, useRef, useState } from 'react';
 import { SiGooglemessages } from "react-icons/si";
 import { FiPaperclip, FiFile } from "react-icons/fi";
 import { v4 as uuidv4 } from 'uuid';
-const Chat = ({ name, messages, sendMessage, showChat }) => {
+const Chat = ({ name, messages, showChat, socketRef }) => {
     const inputRef = useRef();
     const messagesRef = useRef();
     const [message, setMessage] = useState('');
     const [isClosing, setIsClosing] = useState(null);
     const [selectedFile, setSelectedFile] = useState(null);
     const [tooltip, setTooltip] = useState(null);
+
+    const sendMessage = (data) => {
+        if (data.message || data.file) {
+            socketRef.current.emit('sendMessage', data);
+        }
+    };
 
     const handleSendMessage = () => {
         const messageId = uuidv4();

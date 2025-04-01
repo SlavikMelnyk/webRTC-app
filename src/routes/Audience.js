@@ -40,12 +40,6 @@ const Audience = () => {
     const [reactions, setReactions] = useState([]);
     const [isScreenSharing, setIsScreenSharing] = useState(false);
 
-    const sendMessage = (data) => {
-        if (data.message || data.file) {
-            socketRef.current.emit('sendMessage', data);
-        }
-    };
-
     const handleSendReaction = (data) => {
         const messageId = uuidv4();
         const messageData = {
@@ -77,7 +71,8 @@ const Audience = () => {
     };
 
     const toggleMute = () => {
-        if (userVideo.current.srcObject) {
+        console.log(1);
+        
             const audioTrack = userVideo.current.srcObject.getAudioTracks()[0];
             audioTrack.enabled = !audioTrack.enabled;
             const messageData = {
@@ -87,7 +82,6 @@ const Audience = () => {
 			};
 			socketRef.current.emit('sendMessage', messageData);
             setIsMuted(!isMuted);
-        }
     };
     
     const toggleScreenShare = async () => {
@@ -178,12 +172,22 @@ const Audience = () => {
         }
     };
 
-    const leaveRoom = () => {
+    const addPermission = (userName) => {
         const messageData = {
-            message: 'user-left',
-            userName: myName, 
+            message: 'add-permission',
+            userName  
         };
         socketRef.current.emit('sendMessage', messageData);
+        console.log('add permission: ', userName);
+    }
+
+    const leaveRoom = (byCreator = false) => {
+        if (!byCreator) {
+            const messageData = {
+                message: 'user-left',
+                userName: myName, 
+            };
+        socketRef.current.emit('sendMessage', messageData);}
         
         if (userVideo.current?.srcObject) {
             userVideo.current.srcObject.getTracks().forEach(track => track.stop());
@@ -273,7 +277,8 @@ const Audience = () => {
                         isBlurred,
                         selectedBackground,
                         creatorAudience,
-                        leaveRoom
+                        leaveRoom,
+                        toggleMute,
                     );
 
                     return () => {
@@ -402,21 +407,19 @@ const Audience = () => {
                     {!creatorAudience ? peers.filter(peer => peer.creatorAudience).map((peerObj, index) => {
                         return (
                             <Video 
-                            key={index} 
-                            peerObj={peerObj}
-                            maxVideoHeight={maxVideoHeight}
-                        />
+                                key={index} 
+                                peerObj={peerObj}
+                                maxVideoHeight={maxVideoHeight}
+                            />
                         );
                     }) : null}
                 </div>
                 {creatorAudience && <UsersList users={filteredPeers} showList={showUsersList} kickUser={kickUser} />}
-                <Chat name={myName} messages={messages} sendMessage={sendMessage} showChat={showChat} />
+                <Chat socketRef={socketRef} name={myName} messages={messages} showChat={showChat} />
             </div>
             <CallBar 
                 toggleMute={toggleMute} 
-                isMuted={isMuted} 
                 toggleVideo={toggleVideo} 
-                isVideoEnabled={isVideoEnabled} 
                 leaveCall={leaveRoom} 
                 showChat={showChat} 
                 setShowChat={handleOpenChat} 
@@ -432,6 +435,7 @@ const Audience = () => {
                 showUsersList={showUsersList}
                 handleOpenUsersList={handleOpenUsersList}
                 type='audience'
+                addPermission={addPermission}
             />
         </div>
     );
